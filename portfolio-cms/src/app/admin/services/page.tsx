@@ -8,6 +8,7 @@ import { DataTable } from '@/components/ui/DataTable'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { createServerClientSupabase } from '@/supabase/server'
+import { ColumnDef } from '@tanstack/react-table'
 
 export const metadata: Metadata = {
   title: 'Services',
@@ -45,7 +46,14 @@ async function getServices(searchParams: { [key: string]: string | string[] | un
   }
 }
 
-const columns = [
+const columns: ColumnDef<{
+  id: string
+  title: string
+  short_description?: string | null
+  published: boolean
+  order_index: number
+  slug?: string
+}>[] = [
   {
     accessorKey: 'title',
     header: 'Title',
@@ -89,7 +97,8 @@ const columns = [
   },
 ]
 
-export default async function ServicesPage({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+export default async function ServicesPage({ searchParams: sp }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const searchParams = await sp
   const servicesData = await getServices(searchParams)
 
   return (

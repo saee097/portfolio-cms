@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { createServerClientSupabase } from '@/supabase/server'
 import { formatDate } from '@/lib/utils'
+import { ColumnDef } from '@tanstack/react-table'
 
 export const metadata: Metadata = {
   title: 'Experience',
@@ -42,7 +43,16 @@ async function getExperiences(searchParams: { [key: string]: string | string[] |
   }
 }
 
-const columns = [
+const columns: ColumnDef<{
+  id: string
+  title: string
+  company: string
+  location?: string | null
+  current: boolean
+  start_date: string
+  end_date?: string | null
+  order_index: number
+}>[] = [
   {
     accessorKey: 'title',
     header: 'Title',
@@ -100,7 +110,8 @@ const columns = [
   },
 ]
 
-export default async function ExperiencePage({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+export default async function ExperiencePage({ searchParams: sp }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const searchParams = await sp
   const experiencesData = await getExperiences(searchParams)
 
   return (

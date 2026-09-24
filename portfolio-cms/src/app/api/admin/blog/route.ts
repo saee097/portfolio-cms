@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
           .eq('post_id', post.id)
         
         const tagIds = tags?.map(t => t.tag_id) || []
-        let tagData: any[] = []
+        let tagData: Array<Record<string, unknown>> = []
         if (tagIds.length > 0) {
           const { data } = await supabase.from('blog_tags').select('*').in('id', tagIds)
           tagData = data || []

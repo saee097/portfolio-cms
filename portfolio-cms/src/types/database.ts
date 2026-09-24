@@ -277,6 +277,7 @@ export type Database = {
           start_date: string
           end_date: string | null
           current: boolean
+          achievements: Json[]
           order_index: number
           created_at: string
           updated_at: string
@@ -290,6 +291,7 @@ export type Database = {
           start_date: string
           end_date?: string | null
           current?: boolean
+          achievements?: Json[]
           order_index?: number
           created_at?: string
           updated_at?: string

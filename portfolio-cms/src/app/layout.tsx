@@ -3,6 +3,8 @@ import { Inter, Manrope } from 'next/font/google'
 import { Providers } from './providers'
 import './globals.css'
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
@@ -16,6 +18,7 @@ const manrope = Manrope({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: 'Portfolio - Full Stack Developer',
     template: '%s | Portfolio',
@@ -65,13 +68,13 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${manrope.variable} h-full antialiased`}>
+    <html lang="en" suppressHydrationWarning={true} data-scroll-behavior="smooth" className={`${inter.variable} ${manrope.variable} h-full antialiased`}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://your-supabase-project.supabase.co" />
       </head>
-      <body className="min-h-full flex flex-col bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+      <body suppressHydrationWarning={true} className="min-h-full flex flex-col bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100">
         <Providers>{children}</Providers>
       </body>
     </html>

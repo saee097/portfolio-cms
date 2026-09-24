@@ -3,11 +3,7 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   devIndicators: {
-    buildActivity: false,
-  },
-  onDemandEntries: {
-    maxInactiveAge: 60 * 1000,
-    pagesBufferLength: 5,
+    position: 'bottom-right',
   },
   images: {
     remotePatterns: [

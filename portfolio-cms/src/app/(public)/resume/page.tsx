@@ -1,8 +1,9 @@
 import { Metadata } from 'next'
-import { Award, Building2, Calendar, Code, Download, ExternalLink, GraduationCap, MapPin, Star, Trophy } from 'lucide-react'
+import { Award, Briefcase, Building2, Calendar, Code, Database, Download, ExternalLink, GraduationCap, Layers, Mail, MapPin, Phone, Server, Star, Trophy } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
+import { ResumeDownloadButton } from '@/components/ResumeDownloadButton'
 import { formatDate } from '@/lib/utils'
 
 export const metadata: Metadata = {
@@ -144,10 +145,7 @@ export default function ResumePage() {
                   Professional experience, education, and skills overview.
                 </p>
               </div>
-              <Button onClick={handleDownload} className="w-full md:w-auto">
-                <Download className="h-4 w-4 mr-2" />
-                Download PDF
-              </Button>
+              <ResumeDownloadButton />
             </div>
           </div>
         </div>
@@ -392,16 +390,6 @@ export default function ResumePage() {
           </div>
         </div>
       </section>
-
-      {/* Print Styles */}
-      <style jsx>{`
-        @media print {
-          .no-print { display: none !important; }
-          body { background: white !important; color: black !important; }
-          .section { page-break-inside: avoid; }
-          .card { break-inside: avoid; box-shadow: none; border: 1px solid #e2e8f0; }
-        }
-      `}</style>
     </div>
   )
 }

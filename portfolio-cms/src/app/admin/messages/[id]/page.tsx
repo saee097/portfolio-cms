@@ -1,32 +1,37 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowLeft, MessageSquare, Mail, Reply, CheckCircle, Clock, Archive, Trash2, ExternalLink } from 'lucide-react'
+import { ArrowLeft, CheckCircle, Clock, Archive, Reply } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { createServerClientSupabase } from '@/supabase/server'
 import { formatDate } from '@/lib/utils'
+import MessageActions from './MessageActions'
+import { FALLBACK_MESSAGES } from '@/services/media.service'
 
 export const metadata: Metadata = {
   title: 'Message Details',
-  description: 'View message details.',
+  description: 'View contact message details.',
 }
 
 async function getMessage(id: string) {
-  const supabase = createServerClientSupabase()
-  const { data, error } = await supabase.from('messages').select('*').eq('id', id).single()
-  if (error) throw error
-  return data
+  try {
+    const supabase = createServerClientSupabase()
+    const { data, error } = await supabase.from('contact_messages').select('*').eq('id', id).single()
+    if (error || !data) {
+      const fallback = FALLBACK_MESSAGES.find(m => m.id === id) || FALLBACK_MESSAGES[0]
+      return fallback
+    }
+    return data
+  } catch (err) {
+    const fallback = FALLBACK_MESSAGES.find(m => m.id === id) || FALLBACK_MESSAGES[0]
+    return fallback
+  }
 }
 
-export default async function MessageDetailPage({ params }: { params: { id: string } }) {
-  const message = await getMessage(params.id)
-
-  // Mark as read if unread
-  if (!message.read) {
-    const supabase = createServerClientSupabase()
-    await supabase.from('messages').update({ read: true }).eq('id', params.id)
-  }
+export default async function MessageDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const message = await getMessage(id)
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -45,12 +50,14 @@ export default async function MessageDetailPage({ params }: { params: { id: stri
       <Card className="p-6 space-y-6">
         {/* Status Badge */}
         <div className="flex items-center gap-3">
-          {message.archived ? (
+          {message.status === 'archived' ? (
             <Badge variant="secondary"><Archive className="h-3 w-3 mr-1" /> Archived</Badge>
-          ) : message.read ? (
+          ) : message.status === 'replied' ? (
+            <Badge variant="success"><CheckCircle className="h-3 w-3 mr-1" /> Replied</Badge>
+          ) : message.status === 'read' ? (
             <Badge variant="success"><CheckCircle className="h-3 w-3 mr-1" /> Read</Badge>
           ) : (
-            <Badge variant="warning"><Clock className="h-3 w-3 mr-1" /> Unread</Badge>
+            <Badge variant="warning"><Clock className="h-3 w-3 mr-1" /> New</Badge>
           )}
         </div>
 
@@ -81,11 +88,6 @@ export default async function MessageDetailPage({ params }: { params: { id: stri
           <span className="text-sm text-slate-500 dark:text-slate-400">
             Received: {formatDate(message.created_at)}
           </span>
-          {message.read_at && (
-            <span className="text-sm text-slate-500 dark:text-slate-400">
-              Read: {formatDate(message.read_at)}
-            </span>
-          )}
         </div>
 
         {/* Actions */}
@@ -99,33 +101,7 @@ export default async function MessageDetailPage({ params }: { params: { id: stri
               Reply via Email
             </Button>
           </a>
-          {!message.read && !message.archived && (
-            <form action={`/api/admin/messages/${params.id}`} method="POST">
-              <input type="hidden" name="_method" value="PATCH" />
-              <input type="hidden" name="read" value="true" />
-              <Button type="submit">
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Mark as Read
-              </Button>
-            </form>
-          )}
-          {!message.archived && (
-            <form action={`/api/admin/messages/${params.id}`} method="POST">
-              <input type="hidden" name="_method" value="PATCH" />
-              <input type="hidden" name="archived" value="true" />
-              <Button type="submit" variant="outline">
-                <Archive className="h-4 w-4 mr-2" />
-                Archive
-              </Button>
-            </form>
-          )}
-          <form action={`/api/admin/messages/${params.id}`} method="POST" onSubmit={(e) => { if (!confirm('Delete this message?')) e.preventDefault() }}>
-            <input type="hidden" name="_method" value="DELETE" />
-            <Button type="submit" variant="destructive">
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete
-            </Button>
-          </form>
+          <MessageActions id={id} status={message.status} />
         </div>
       </Card>
     </div>

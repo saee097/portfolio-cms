@@ -3,81 +3,16 @@ import { Award, BookOpen, Building2, Calendar, Code, GraduationCap, MapPin, Star
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { formatDate } from '@/lib/utils'
+import { getEducation } from '@/services/experience.service'
+import type { Education } from '@/types'
 
 export const metadata: Metadata = {
   title: 'Education',
   description: 'Academic background and educational achievements.',
 }
 
-const education = [
-  {
-    id: '1',
-    degree: 'Master of Science in Computer Science',
-    institution: 'Stanford University',
-    location: 'Stanford, CA',
-    description: 'Specialized in Distributed Systems and Machine Learning. Thesis: "Optimizing Microservice Communication Patterns for Low-Latency Applications". GPA: 3.9/4.0. Relevant coursework: Advanced Algorithms, Distributed Systems, Machine Learning, Computer Networks, Database Systems.',
-    startDate: '2017-09-01',
-    endDate: '2019-06-15',
-    current: false,
-    achievements: [
-      'Dean\'s List (All Semesters)',
-      'Research Assistant - Distributed Systems Lab',
-      'Teaching Assistant - Data Structures & Algorithms',
-      'Published paper at ICSE 2019',
-    ],
-  },
-  {
-    id: '2',
-    degree: 'Bachelor of Science in Computer Engineering',
-    institution: 'University of California, Berkeley',
-    location: 'Berkeley, CA',
-    description: 'Focus on Software Engineering and Embedded Systems. Capstone Project: "Real-time IoT Monitoring Platform for Smart Agriculture". GPA: 3.8/4.0. Relevant coursework: Software Engineering, Operating Systems, Computer Architecture, Digital Design, Signals & Systems.',
-    startDate: '2013-09-01',
-    endDate: '2017-06-15',
-    current: false,
-    achievements: [
-      'Graduated with Honors',
-      'ACM Student Chapter President',
-      'Hackathon Winner (3x)',
-      'Google Summer of Code Participant',
-    ],
-  },
-  {
-    id: '3',
-    degree: 'AWS Certified Solutions Architect - Professional',
-    institution: 'Amazon Web Services',
-    location: 'Online',
-    description: 'Advanced certification validating expertise in designing distributed systems on AWS. Covers migration strategies, cost optimization, security, and hybrid architectures.',
-    startDate: '2023-03-01',
-    endDate: '2023-03-15',
-    current: false,
-    achievements: ['Score: 920/1000'],
-  },
-  {
-    id: '4',
-    degree: 'Google Cloud Professional Cloud Architect',
-    institution: 'Google Cloud',
-    location: 'Online',
-    description: 'Professional certification demonstrating ability to design, develop, and manage robust, secure, scalable, highly available, and dynamic solutions on Google Cloud.',
-    startDate: '2022-11-01',
-    endDate: '2022-11-20',
-    current: false,
-    achievements: [],
-  },
-  {
-    id: '5',
-    degree: 'Certified Kubernetes Administrator (CKA)',
-    institution: 'Cloud Native Computing Foundation',
-    location: 'Online',
-    description: 'Performance-based certification validating skills to deploy, manage, and troubleshoot Kubernetes clusters.',
-    startDate: '2022-08-01',
-    endDate: '2022-08-15',
-    current: false,
-    achievements: [],
-  },
-]
-
-export default function EducationPage() {
+export default async function EducationPage() {
+  const education = await getEducation()
   const degrees = education.filter(e => e.degree.includes('Bachelor') || e.degree.includes('Master'))
   const certifications = education.filter(e => !e.degree.includes('Bachelor') && !e.degree.includes('Master'))
 
@@ -113,7 +48,7 @@ export default function EducationPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="text-sm font-medium text-primary-700 bg-primary-100 px-3 py-1 rounded-full dark:bg-primary-900/30 dark:text-primary-300">
-                        {formatDate(edu.startDate)} - {formatDate(edu.endDate!)}
+                        {formatDate(edu.start_date)} - {edu.current ? 'Present' : formatDate(edu.end_date!)}
                       </span>
                     </div>
                     <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-1">{edu.degree}</h3>
@@ -123,12 +58,12 @@ export default function EducationPage() {
                       <span>{edu.location}</span>
                     </div>
                     <p className="text-slate-600 dark:text-slate-400 mb-4">{edu.description}</p>
-                    {edu.achievements.length > 0 && (
+                    {Array.isArray(edu.achievements) && edu.achievements.length > 0 && (
                       <div className="flex flex-wrap gap-2">
                         {edu.achievements.map((achievement, i) => (
                           <Badge key={i} variant="secondary" className="text-xs">
                             <Star className="h-3 w-3 mr-1" />
-                            {achievement}
+                            {String(achievement)}
                           </Badge>
                         ))}
                       </div>
@@ -167,14 +102,14 @@ export default function EducationPage() {
                     <p className="text-primary-700 dark:text-primary-300 font-medium mb-2">{cert.institution}</p>
                     <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 mb-2">
                       <Calendar className="h-4 w-4" />
-                      <span>{formatDate(cert.startDate)}</span>
+                      <span>{formatDate(cert.start_date)}</span>
                     </div>
                     <p className="text-sm text-slate-600 dark:text-slate-400">{cert.description}</p>
-                    {cert.achievements.length > 0 && (
+                    {Array.isArray(cert.achievements) && cert.achievements.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-1">
                         {cert.achievements.map((achievement, i) => (
                           <Badge key={i} variant="outline" className="text-xs">
-                            {achievement}
+                            {String(achievement)}
                           </Badge>
                         ))}
                       </div>

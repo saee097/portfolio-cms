@@ -46,9 +46,7 @@ export async function PATCH(
 
     const dataToUpdate = {
       ...validation.data,
-      technologies: validation.data.technologies 
-        ? validation.data.technologies.split(',').map((t: string) => t.trim()).filter(Boolean)
-        : undefined,
+      technologies: validation.data.technologies ?? [],
       updated_at: new Date().toISOString(),
     }
 

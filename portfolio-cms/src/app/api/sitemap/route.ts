@@ -1,6 +1,17 @@
 import { createServerClientSupabase } from '@/supabase/server'
+import { NextResponse } from 'next/server'
 
 export async function GET() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return NextResponse.json(
+      { error: 'Supabase configuration is missing' },
+      { status: 503 }
+    )
+  }
+
   const supabase = createServerClientSupabase()
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://your-domain.com'
 

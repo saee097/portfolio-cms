@@ -1,10 +1,7 @@
 import { Metadata } from 'next'
-import { Mail, MapPin, Phone, Send, Loader2 } from 'lucide-react'
+import { Mail, MapPin, Phone } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
-import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
-import { Textarea } from '@/components/ui/Textarea'
-import { toast } from 'react-hot-toast'
+import { ContactForm } from '@/components/ContactForm'
 
 export const metadata: Metadata = {
   title: 'Contact',
@@ -12,33 +9,6 @@ export const metadata: Metadata = {
 }
 
 export default function ContactPage() {
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    const formData = new FormData(e.currentTarget)
-    
-    const data = {
-      name: formData.get('name'),
-      email: formData.get('email'),
-      subject: formData.get('subject'),
-      message: formData.get('message'),
-    }
-
-    try {
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      })
-
-      if (!res.ok) throw new Error('Failed to send message')
-      
-      toast.success('Message sent successfully!')
-      e.currentTarget.reset()
-    } catch {
-      toast.error('Failed to send message. Please try again.')
-    }
-  }
-
   return (
     <div className="space-y-24">
       {/* Hero Section */}
@@ -49,7 +19,7 @@ export default function ContactPage() {
               Get In <span className="text-primary-700 dark:text-primary-300">Touch</span>
             </h1>
             <p className="text-xl sm:text-2xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
-              Have a project in mind? I'd love to hear about it. Send me a message and let's discuss.
+              Have a project in mind? I&apos;d love to hear about it. Send me a message and let&apos;s discuss.
             </p>
           </div>
         </div>
@@ -62,9 +32,9 @@ export default function ContactPage() {
             {/* Contact Info */}
             <div className="lg:col-span-1 space-y-8">
               <Card className="h-full">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-6">Let's Start a Conversation</h2>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-6">Let&apos;s Start a Conversation</h2>
                 <p className="text-slate-600 dark:text-slate-400 mb-8">
-                  I'm always open to discussing new projects, creative ideas, or opportunities to be part of your vision.
+                  I&apos;m always open to discussing new projects, creative ideas, or opportunities to be part of your vision.
                 </p>
                 
                 <div className="space-y-6">
@@ -125,45 +95,7 @@ export default function ContactPage() {
             <div className="lg:col-span-2">
               <Card>
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-6">Send a Message</h2>
-                <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <Input
-                      label="Name"
-                      name="name"
-                      placeholder="Your name"
-                      required
-                      autoComplete="name"
-                    />
-                    <Input
-                      label="Email"
-                      name="email"
-                      type="email"
-                      placeholder="your@email.com"
-                      required
-                      autoComplete="email"
-                    />
-                  </div>
-                  <Input
-                    label="Subject"
-                    name="subject"
-                    placeholder="What's this about?"
-                    required
-                  />
-                  <Textarea
-                    label="Message"
-                    name="message"
-                    placeholder="Tell me about your project..."
-                    rows={6}
-                    required
-                  />
-                  <Button type="submit" className="w-full" disabled={false}>
-                    <Send className="h-4 w-4 mr-2" />
-                    Send Message
-                  </Button>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
-                    By submitting this form, you agree to our Privacy Policy. Your information will not be shared with third parties.
-                  </p>
-                </form>
+                <ContactForm />
               </Card>
             </div>
           </div>
@@ -179,7 +111,7 @@ export default function ContactPage() {
           <div className="max-w-3xl mx-auto space-y-4">
             <details className="card group">
               <summary className="flex items-center justify-between cursor-pointer list-none font-medium text-slate-900 dark:text-slate-100">
-                What's your typical project timeline?
+                What&apos;s your typical project timeline?
                 <span className="transition-transform group-open:rotate-180">▼</span>
               </summary>
               <div className="mt-4 text-slate-600 dark:text-slate-400">
@@ -192,21 +124,21 @@ export default function ContactPage() {
                 <span className="transition-transform group-open:rotate-180">▼</span>
               </summary>
               <div className="mt-4 text-slate-600 dark:text-slate-400">
-                <p>Yes! I frequently work with existing codebases for feature additions, refactoring, performance optimization, and bug fixes. I can adapt to your team's coding standards and workflows.</p>
+                <p>Yes! I frequently work with existing codebases for feature additions, refactoring, performance optimization, and bug fixes. I can adapt to your team&apos;s coding standards and workflows.</p>
               </div>
             </details>
             <details className="card group">
               <summary className="flex items-center justify-between cursor-pointer list-none font-medium text-slate-900 dark:text-slate-100">
-                What's your availability for new projects?
+                What&apos;s your availability for new projects?
                 <span className="transition-transform group-open:rotate-180">▼</span>
               </summary>
               <div className="mt-4 text-slate-600 dark:text-slate-400">
-                <p>I'm currently available for new projects starting next month. For urgent requests, please mention it in your message and I'll do my best to accommodate.</p>
+                <p>I&apos;m currently available for new projects starting next month. For urgent requests, please mention it in your message and I&apos;ll do my best to accommodate.</p>
               </div>
             </details>
             <details className="card group">
               <summary className="flex items-center justify-between cursor-pointer list-none font-medium text-slate-900 dark:text-slate-100">
-                What's included in your development process?
+                What&apos;s included in your development process?
                 <span className="transition-transform group-open:rotate-180">▼</span>
               </summary>
               <div className="mt-4 text-slate-600 dark:text-slate-400">

@@ -12,7 +12,25 @@ export const metadata: Metadata = {
   description: 'Admin dashboard settings.',
 }
 
-const settingsSections = [
+interface ConfigField {
+  name: string
+  label: string
+  type: string
+  placeholder?: string
+  rows?: number
+  options?: { value: string; label: string }[]
+  min?: string
+  max?: string
+}
+
+interface SettingsSection {
+  id: string
+  title: string
+  icon: React.ComponentType<{ className?: string }>
+  fields: ConfigField[]
+}
+
+const settingsSections: SettingsSection[] = [
   {
     id: 'general',
     title: 'General',
@@ -149,7 +167,7 @@ export default async function AdminSettingsPage() {
                         type="checkbox"
                         name={field.name}
                         id={field.name}
-                        defaultChecked={value === 'true' || value === true}
+                        defaultChecked={value === 'true'}
                         className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
                       />
                       <label htmlFor={field.name} className="font-medium text-slate-900 dark:text-slate-100">

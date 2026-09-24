@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowLeft, Upload, Image as ImageIcon, Search, Trash2, Copy, Download, Eye, MoreHorizontal } from 'lucide-react'
+import { ArrowLeft, Upload, Image as ImageIcon, Search, Trash2, Copy, Download, Eye, MoreHorizontal, ExternalLink } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -57,7 +57,8 @@ function isImage(mimeType: string) {
   return mimeType.startsWith('image/')
 }
 
-export default async function MediaPage({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+export default async function MediaPage({ searchParams: sp }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const searchParams = await sp
   const mediaData = await getMediaFiles(searchParams)
 
   return (

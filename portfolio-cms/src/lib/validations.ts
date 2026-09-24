@@ -48,7 +48,14 @@ export const experienceSchema = z.object({
   company: z.string().min(1, 'Company is required').max(200),
   location: z.string().max(200).optional().nullable(),
   description: z.string().max(2000).optional().nullable(),
-  technologies: z.array(z.string()).optional().nullable(),
+  technologies: z.preprocess(
+    (val) => {
+      if (typeof val === 'string') return val.split(/[\n,]/).map(s => s.trim()).filter(Boolean)
+      if (Array.isArray(val)) return val
+      return val
+    },
+    z.array(z.string()).optional().nullable()
+  ),
   start_date: z.string().date(),
   end_date: z.string().date().optional().nullable(),
   current: z.boolean().default(false),
@@ -72,7 +79,14 @@ export const serviceSchema = z.object({
   description: z.string().max(2000).optional().nullable(),
   short_description: z.string().max(500).optional().nullable(),
   icon: z.string().optional().nullable(),
-  features: z.array(z.string()).optional().nullable(),
+  features: z.preprocess(
+    (val) => {
+      if (typeof val === 'string') return val.split(/[\n,]/).map(s => s.trim()).filter(Boolean)
+      if (Array.isArray(val)) return val
+      return val
+    },
+    z.array(z.string()).optional().nullable()
+  ),
   order_index: z.number().int().min(0).default(0),
   published: z.boolean().default(true),
 })
@@ -88,6 +102,7 @@ export const blogPostSchema = z.object({
   published_at: z.string().datetime().optional().nullable(),
   reading_time: z.number().int().min(0).default(0),
   views: z.number().int().min(0).default(0),
+  tag_ids: z.array(z.string().uuid()).optional().nullable(),
   seo_title: z.string().max(60).optional().nullable(),
   seo_description: z.string().max(160).optional().nullable(),
   status: z.enum(['draft', 'published']).default('draft'),

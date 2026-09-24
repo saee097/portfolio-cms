@@ -119,53 +119,225 @@ Navigate to `/admin/login` and sign in with your admin credentials.
 
 ```
 portfolio-cms/
-├── public/                 # Static assets
+├── .env.example              # Environment variable template
+├── .env                      # Local environment (not committed)
+├── next.config.ts            # Next.js configuration
+├── tailwind.config.ts        # Tailwind CSS configuration
+├── tsconfig.json             # TypeScript configuration
+├── eslint.config.mjs         # ESLint configuration (flat config)
+├── postcss.config.mjs        # PostCSS configuration (Tailwind + Autoprefixer)
+├── vercel.json               # Vercel deployment configuration
+├── package.json
+├── package-lock.json
+├── README.md
+├── public/                   # Static assets (favicon, SVGs)
+├── scripts/
+│   └── create-admin.js       # Bootstraps the initial super_admin user
 ├── src/
-│   ├── app/               # Next.js App Router
-│   │   ├── (public)/      # Public route group
+│   ├── proxy.ts              # Custom Jest/Playwright proxy setup
+│   ├── app/                  # Next.js App Router
+│   │   ├── (public)/         # Public route group (no auth required)
 │   │   │   ├── about/
+│   │   │   │   └── page.tsx
 │   │   │   ├── blog/
+│   │   │   │   ├── page.tsx           # Blog list
+│   │   │   │   └── [slug]/
+│   │   │   │       └── page.tsx       # Blog post detail
 │   │   │   ├── contact/
+│   │   │   │   └── page.tsx
 │   │   │   ├── education/
+│   │   │   │   └── page.tsx
 │   │   │   ├── experience/
+│   │   │   │   └── page.tsx
 │   │   │   ├── projects/
+│   │   │   │   ├── page.tsx           # Project list
+│   │   │   │   └── [slug]/
+│   │   │   │       └── page.tsx       # Project detail
 │   │   │   ├── resume/
+│   │   │   │   └── page.tsx
 │   │   │   ├── services/
+│   │   │   │   └── page.tsx
 │   │   │   ├── skills/
+│   │   │   │   └── page.tsx
 │   │   │   ├── layout.tsx
-│   │   │   └── page.tsx
-│   │   ├── admin/         # Admin routes
+│   │   │   ├── loading.tsx
+│   │   │   ├── error.tsx
+│   │   │   ├── not-found.tsx
+│   │   │   └── page.tsx              # Home page
+│   │   ├── admin/                   # Admin routes (auth required)
 │   │   │   ├── components/
-│   │   │   ├── projects/
-│   │   │   ├── blog/
+│   │   │   │   └── AdminLayout.tsx
 │   │   │   ├── layout.tsx
+│   │   │   ├── loading.tsx
+│   │   │   ├── error.tsx
+│   │   │   ├── not-found.tsx
+│   │   │   ├── page.tsx              # Dashboard overview
 │   │   │   ├── login/
-│   │   │   └── page.tsx
-│   │   ├── api/           # API routes
+│   │   │   │   ├── AdminLoginForm.tsx
+│   │   │   │   └── page.tsx
+│   │   │   ├── logout/
+│   │   │   │   └── page.tsx
+│   │   │   ├── profile/
+│   │   │   │   └── page.tsx
+│   │   │   ├── settings/
+│   │   │   │   └── page.tsx
+│   │   │   ├── seo/
+│   │   │   │   └── page.tsx
+│   │   │   ├── analytics/
+│   │   │   │   └── page.tsx
+│   │   │   ├── messages/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [id]/
+│   │   │   │       └── page.tsx
+│   │   │   ├── media/
+│   │   │   │   └── page.tsx
+│   │   │   ├── projects/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── create/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── [id]/
+│   │   │   │       └── page.tsx
+│   │   │   ├── blog/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── create/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── [id]/
+│   │   │   │       └── page.tsx
+│   │   │   ├── skills/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── create/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── [id]/
+│   │   │   │       └── page.tsx
+│   │   │   ├── experience/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── create/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── [id]/
+│   │   │   │       └── page.tsx
+│   │   │   ├── education/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── create/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── [id]/
+│   │   │   │       └── page.tsx
+│   │   │   ├── services/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── create/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── [id]/
+│   │   │   │       └── page.tsx
+│   │   │   ├── testimonials/
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── create/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── [id]/
+│   │   │   │       └── page.tsx
+│   │   ├── api/                       # API route handlers
 │   │   │   ├── contact/
+│   │   │   │   └── route.ts
 │   │   │   ├── robots/
-│   │   │   └── sitemap/
-│   │   ├── auth/          # Auth callbacks
+│   │   │   │   └── route.ts
+│   │   │   ├── sitemap/
+│   │   │   │   └── route.ts
+│   │   │   ├── auth/
+│   │   │   │   └── callback/
+│   │   │   │       └── route.ts
+│   │   │   └── admin/                 # Admin API (server-side, uses service role)
+│   │   │       ├── analytics/
+│   │   │       │   └── route.ts
+│   │   │       ├── blog/
+│   │   │       │   ├── route.ts
+│   │   │       │   └── [id]/route.ts
+│   │   │       ├── education/
+│   │   │       │   ├── route.ts
+│   │   │       │   └── [id]/route.ts
+│   │   │       ├── experience/
+│   │   │       │   ├── route.ts
+│   │   │       │   └── [id]/route.ts
+│   │   │       ├── login/
+│   │   │       │   └── route.ts
+│   │   │       ├── media/
+│   │   │       │   ├── route.ts
+│   │   │       │   └── [id]/route.ts
+│   │   │       ├── messages/
+│   │   │       │   ├── route.ts
+│   │   │       │   ├── [id]/route.ts
+│   │   │       │   └── [id]/status/ route.ts
+│   │   │       ├── projects/
+│   │   │       │   ├── route.ts
+│   │   │       │   └── [id]/route.ts
+│   │   │       ├── seo/
+│   │   │       │   ├── route.ts
+│   │   │       │   └── [page]/route.ts
+│   │   │       ├── services/
+│   │   │       │   ├── route.ts
+│   │   │       │   └── [id]/route.ts
+│   │   │       ├── settings/
+│   │   │       │   └── route.ts
+│   │   │       ├── skill-categories/
+│   │   │       │   ├── route.ts
+│   │   │   │     └── [id]/route.ts
+│   │   │       ├── skills/
+│   │   │       │   ├── route.ts
+│   │   │       │   └── [id]/route.ts
+│   │   │       ├── testimonials/
 │   │   ├── globals.css
-│   │   ├── layout.tsx
-│   │   ├── providers.tsx
-│   │   └── page.tsx
+│   │   ├── layout.tsx              # Root layout
+│   │   ├── providers.tsx           # Global providers (theme, toast)
+│   │   └── page.tsx                # Not used (public uses (public)/page.tsx)
 │   ├── components/
-│   │   ├── admin/         # Admin-specific components
-│   │   ├── public/        # Public-facing components
-│   │   └── ui/            # Reusable UI components
-│   ├── hooks/             # Custom React hooks
-│   ├── lib/               # Utilities, validations
-│   ├── services/          # Data access layer
-│   ├── supabase/          # Supabase clients
-│   └── types/             # TypeScript definitions
+│   │   ├── admin/                  # Admin-specific components
+│   │   │   ├── AdminBreadcrumb.tsx
+│   │   │   └── AdminSidebar.tsx
+│   │   ├── public/                 # Public-facing components
+│   │   │   ├── Footer.tsx
+│   │   │   ├── Navbar.tsx
+│   │   │   └── ContactForm.tsx
+│   │   ├── ResumeDownloadButton.tsx
+│   │   └── ui/                     # Reusable UI component library
+│   │       ├── Badge.tsx
+│   │       ├── Button.tsx
+│   │       ├── Card.tsx
+│   │       ├── ConfirmDialog.tsx
+│   │       ├── DataTable.tsx
+│   │       ├── Dropdown.tsx
+│   │       ├── EmptyState.tsx
+│   │       ├── Input.tsx
+│   │       ├── Modal.tsx
+│   │       ├── Select.tsx
+│   │       ├── Skeleton.tsx
+│   │       ├── Switch.tsx
+│   │       ├── Textarea.tsx
+│   │       └── Toast.tsx
+│   ├── hooks/                      # Custom React hooks
+│   │   ├── useAuth.tsx
+│   │   ├── useBlog.ts
+│   │   ├── useProjects.ts
+│   │   └── useToast.tsx
+│   ├── lib/
+│   │   ├── utils.ts               # Shared helpers (cn, formatting)
+│   │   └── validations.ts         # Zod schemas for forms & API
+│   ├── services/                    # Data access layer (Supabase queries/mutations)
+│   │   ├── analytics.service.ts
+│   │   ├── blog.service.ts
+│   │   ├── experience.service.ts
+│   │   ├── media.service.ts
+│   │   ├── project.service.ts
+│   │   ├── service.service.ts
+│   │   └── skill.service.ts
+│   ├── supabase/                    # Supabase client wrappers
+│   │   ├── client.ts               # Browser client
+│   │   ├── server.ts               # Server client (SSR cookies)
+│   │   └── admin.ts                # Admin client (service_role)
+│   └── types/
+│       ├── index.ts                # Shared TypeScript types
+│       └── database.ts             # Supabase database types
 ├── supabase/
-│   └── schema.sql         # Database schema
-├── .env.example
-├── next.config.ts
-├── tailwind.config.ts
-├── tsconfig.json
-└── vercel.json
+│   └── schema.sql                  # Database schema, RLS, triggers, functions
+└── .kilo/                          # Kilo CLI command & agent configuration
+    ├── commands/
+    └── agents/
 ```
 
 ## Database Schema
@@ -176,6 +348,47 @@ The `supabase/schema.sql` file contains:
 - Row Level Security policies
 - Triggers for `updated_at` timestamps
 - Helper functions (blog view increment, user signup)
+
+## Configuration Files
+
+| File | Purpose |
+| --- | --- |
+| `next.config.ts` | Next.js config: strict mode, image optimization (Supabase/GitHub avatars), security headers, sitemap/robots rewrites, Server Actions `bodySizeLimit: 2mb` |
+| `tailwind.config.ts` | Tailwind content paths (`src/`), custom `primary`/`slate` color palettes, `inter`/`manrope` font families, and motion keyframes (`fade-in`, `slide-up`, `slide-down`, `scale-in`) |
+| `tsconfig.json` | Strict TypeScript, `jsx: react-jsx`, bundler resolution, `@/*` → `./src/*` path alias, incremental builds |
+| `eslint.config.mjs` | Flat-config ESLint using `eslint-config-next` (core-web-vitals + typescript), ignoring `.next/`, `out/`, `build/`, `next-env.d.ts` |
+| `postcss.config.mjs` | PostCSS pipeline: `tailwindcss` + `autoprefixer` |
+| `vercel.json` | Vercel deployment: `nextjs` framework, `iad1` region, 30s max duration for API routes, security headers, sitemap/robots rewrites |
+| `.env.example` | Environment variable template — copy to `.env.local` before running |
+
+## Environment Variables
+
+Copy `.env.example` to `.env.local` and fill in your values:
+
+```bash
+cp .env.example .env.local
+```
+
+Required variables:
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+NEXT_PUBLIC_SITE_URL=https://your-domain.com
+NEXT_PUBLIC_SITE_NAME=Your Name - Portfolio
+```
+
+Optional variables:
+```env
+NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=your_email@example.com
+SMTP_PASS=your_email_password
+CONTACT_EMAIL=your_email@example.com
+NEXT_PUBLIC_RECAPTCHA_SITE_KEY=your_recaptcha_site_key
+RECAPTCHA_SECRET_KEY=your_recaptcha_secret_key
+```
 
 ## Deployment
 

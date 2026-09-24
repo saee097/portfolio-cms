@@ -13,26 +13,26 @@ async function getAnalytics() {
   const supabase = createServerClientSupabase()
   
   // Get total views
-  const { count: totalViews } = await supabase.from('analytics').select('*', { count: 'exact', head: true })
+  const { count: totalViews } = await supabase.from('analytics_events').select('*', { count: 'exact', head: true })
   
-  // Get unique visitors (approximate by distinct sessions)
-  const { data: sessions } = await supabase.from('analytics').select('session_id').not('session_id', 'is', null)
-  const uniqueVisitors = new Set(sessions?.map(s => s.session_id) || []).size
+  // Get unique visitors (approximate by distinct page_urls)
+  const { data: pageUrls } = await supabase.from('analytics_events').select('page_url').not('page_url', 'is', null)
+  const uniqueVisitors = new Set(pageUrls?.map(p => p.page_url) || []).size
   
   // Get today's views
   const today = new Date().toISOString().split('T')[0]
-  const { count: todayViews } = await supabase.from('analytics').select('*', { count: 'exact', head: true }).gte('created_at', today)
+  const { count: todayViews } = await supabase.from('analytics_events').select('*', { count: 'exact', head: true }).gte('created_at', today)
   
   // Get top pages
   const { data: topPages } = await supabase
-    .from('analytics')
-    .select('path')
-    .not('path', 'is', null)
+    .from('analytics_events')
+    .select('page_url')
+    .not('page_url', 'is', null)
     .limit(1000)
   
   const pageCounts: Record<string, number> = {}
   topPages?.forEach(p => {
-    pageCounts[p.path] = (pageCounts[p.path] || 0) + 1
+    pageCounts[p.page_url] = (pageCounts[p.page_url] || 0) + 1
   })
   const topPagesSorted = Object.entries(pageCounts)
     .sort(([,a], [,b]) => b - a)
@@ -42,7 +42,7 @@ async function getAnalytics() {
   const thirtyDaysAgo = new Date()
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
   const { data: dailyData } = await supabase
-    .from('analytics')
+    .from('analytics_events')
     .select('created_at')
     .gte('created_at', thirtyDaysAgo.toISOString())
     .order('created_at', { ascending: true })
@@ -55,7 +55,7 @@ async function getAnalytics() {
   
   // Get recent activity
   const { data: recentActivity } = await supabase
-    .from('analytics')
+    .from('analytics_events')
     .select('*')
     .order('created_at', { ascending: false })
     .limit(20)
@@ -102,7 +102,7 @@ export default async function AnalyticsPage() {
             <Calendar className="h-6 w-6 text-orange-600" />
           </div>
           <p className="text-3xl font-bold text-slate-900 dark:text-slate-100">{analytics.todayViews.toLocaleString()}</p>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Today's Views</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Today&apos;s Views</p>
         </Card>
         <Card className="text-center">
           <div className="flex items-center justify-center gap-2 mb-2">

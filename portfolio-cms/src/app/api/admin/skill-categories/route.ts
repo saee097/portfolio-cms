@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1')
     const pageSize = parseInt(searchParams.get('pageSize') || '50')
 
-    let query = supabase.from('skill_categories').select('*', { count: 'exact' })
+    const query = supabase.from('skill_categories').select('*', { count: 'exact' })
 
     const { data, error, count } = await query
       .order('order_index', { ascending: true })

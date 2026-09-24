@@ -3,60 +3,17 @@ import { Briefcase, Building2, Calendar, Code, MapPin, Server } from 'lucide-rea
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { formatDate } from '@/lib/utils'
+import { getExperiences } from '@/services/experience.service'
+import type { Experience } from '@/types'
 
 export const metadata: Metadata = {
   title: 'Experience',
   description: 'Professional work experience and career history.',
 }
 
-const experiences = [
-  {
-    id: '1',
-    title: 'Senior Full Stack Developer',
-    company: 'Tech Company Inc.',
-    location: 'San Francisco, CA',
-    description: 'Leading development of scalable web applications using React, Next.js, and Node.js. Architected and implemented a new micro-frontend architecture that improved deployment frequency by 300%. Mentoring 5+ junior developers and conducting code reviews. Established coding standards, CI/CD pipelines, and automated testing practices.',
-    technologies: ['React', 'Next.js', 'TypeScript', 'PostgreSQL', 'AWS', 'Docker', 'GraphQL', 'Jest'],
-    startDate: '2022-03-01',
-    endDate: null,
-    current: true,
-  },
-  {
-    id: '2',
-    title: 'Full Stack Developer',
-    company: 'StartupXYZ',
-    location: 'New York, NY',
-    description: 'Built and maintained multiple client projects from concept to production. Developed a real-time collaboration platform with WebSocket connections serving 10,000+ concurrent users. Implemented payment integration with Stripe and built comprehensive admin dashboards. Reduced API response times by 60% through query optimization and caching.',
-    technologies: ['React', 'Node.js', 'Express', 'MongoDB', 'Socket.io', 'Stripe', 'Redis', 'Docker'],
-    startDate: '2020-06-01',
-    endDate: '2022-02-28',
-    current: false,
-  },
-  {
-    id: '3',
-    title: 'Junior Web Developer',
-    company: 'Digital Agency',
-    location: 'Remote',
-    description: 'Developed responsive websites and web applications for various clients across different industries. Built custom WordPress themes and plugins. Collaborated with designers to implement pixel-perfect UIs. Learned modern JavaScript frameworks and backend development practices.',
-    technologies: ['JavaScript', 'Vue.js', 'PHP', 'MySQL', 'WordPress', 'HTML/CSS', 'Git', 'REST APIs'],
-    startDate: '2019-01-01',
-    endDate: '2020-05-31',
-    current: false,
-  },
-  {
-    id: '4',
-    title: 'Software Engineering Intern',
-    company: 'TechCorp',
-    location: 'Boston, MA',
-    description: 'Assisted in developing internal tools for the engineering team. Built automated testing scripts and improved deployment processes. Contributed to the migration of legacy systems to modern cloud infrastructure. Gained experience with agile methodologies and version control.',
-    technologies: ['Python', 'Django', 'PostgreSQL', 'AWS', 'Jenkins', 'Git', 'Linux'],
-    startDate: '2018-06-01',
-    endDate: '2018-12-31',
-    current: false,
-  },
-]
+export default async function ExperiencePage() {
+  const experiences = await getExperiences()
 
-export default function ExperiencePage() {
   return (
     <div className="space-y-24">
       {/* Hero Section */}
@@ -85,7 +42,7 @@ export default function ExperiencePage() {
                   <Card className="group hover:shadow-lg transition-shadow">
                     <div className="flex flex-wrap items-center gap-2 mb-4">
                       <span className="text-sm font-medium text-primary-700 bg-primary-100 px-3 py-1 rounded-full dark:bg-primary-900/30 dark:text-primary-300">
-                        {formatDate(exp.startDate)} - {exp.current ? 'Present' : formatDate(exp.endDate!)}
+                        {formatDate(exp.start_date)} - {exp.current ? 'Present' : formatDate(exp.end_date!)}
                       </span>
                       {exp.current && (
                         <Badge variant="default" className="text-xs">
@@ -101,7 +58,7 @@ export default function ExperiencePage() {
                     <p className="text-lg text-primary-700 dark:text-primary-300 font-medium mb-4">{exp.company}</p>
                     <p className="text-slate-600 dark:text-slate-400 mb-4">{exp.description}</p>
                     <div className="flex flex-wrap gap-2">
-                      {exp.technologies.map(tech => (
+                      {(exp.technologies || []).map(tech => (
                         <Badge key={tech} variant="secondary" className="text-xs">
                           {tech}
                         </Badge>

@@ -206,7 +206,7 @@ export default async function EditProjectPage({ params }: ProjectEditPageProps) 
               <div>
                 <h3 className="text-sm font-medium text-slate-900 dark:text-slate-100 mb-3">Additional Images</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {project.images.map((image, index) => (
+                   {project.images.map((image: { id: string; url: string; alt?: string | null }, index: number) => (
                     <div key={image.id} className="relative group aspect-square">
                       <div className="aspect-square rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800">
                         <img src={image.url} alt={image.alt || ''} className="w-full h-full object-cover" />

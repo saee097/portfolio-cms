@@ -31,8 +31,9 @@ async function getTestimonial(id: string) {
   return data
 }
 
-export default async function TestimonialEditPage({ params }: { params: { id: string } }) {
-  const testimonial = await getTestimonial(params.id)
+export default async function TestimonialEditPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const testimonial = await getTestimonial(id)
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -49,7 +50,7 @@ export default async function TestimonialEditPage({ params }: { params: { id: st
 
       {/* Form */}
       <Card className="p-6">
-        <form action={`/api/admin/testimonials/${params.id}`} method="POST" className="space-y-6">
+        <form action={`/api/admin/testimonials/${id}`} method="POST" className="space-y-6">
           <input type="hidden" name="_method" value="PATCH" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -124,7 +125,7 @@ export default async function TestimonialEditPage({ params }: { params: { id: st
               <Save className="h-4 w-4 mr-2" />
               Update Testimonial
             </Button>
-            <form action={`/api/admin/testimonials/${params.id}`} method="POST" onSubmit={(e) => { if (!confirm('Delete this testimonial?')) e.preventDefault() }}>
+            <form action={`/api/admin/testimonials/${id}`} method="POST" onSubmit={(e) => { if (!confirm('Delete this testimonial?')) e.preventDefault() }}>
               <input type="hidden" name="_method" value="DELETE" />
               <Button type="submit" variant="destructive">
                 <Trash2 className="h-4 w-4 mr-2" />

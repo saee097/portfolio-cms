@@ -28,34 +28,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 
+  async function loadProfile(userId: string) {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .single()
+    setProfile(data)
+  }
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSession(session)
       setUser(session?.user ?? null)
-      
+
       if (session?.user) {
-        const { data } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .single()
-        setProfile(data)
+        await loadProfile(session.user.id)
       } else {
         setProfile(null)
       }
       setLoading(false)
     })
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .single()
-          .then(({ data }) => setProfile(data))
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user ?? null)
+      if (user) {
+        loadProfile(user.id)
       }
       setLoading(false)
     })
@@ -74,12 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshProfile = async () => {
     if (user) {
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single()
-      setProfile(data)
+      await loadProfile(user.id)
     }
   }
 

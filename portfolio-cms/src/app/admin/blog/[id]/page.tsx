@@ -36,7 +36,7 @@ async function getBlogPost(id: string) {
 
   if (error || !post) return null
 
-  const tagIds = post.tags?.map((t: any) => t.tag_id) || []
+  const tagIds = post.tags?.map((t: { tag_id: string }) => t.tag_id) || []
   
   return { ...post, tag_ids: tagIds }
 }

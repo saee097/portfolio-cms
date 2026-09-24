@@ -1,8 +1,7 @@
 import { cn } from '@/lib/utils'
-import { SortingState, ColumnDef, flexRender, getCoreRowModel, getSortedRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
+import { ColumnDef, flexRender, getCoreRowModel, getSortedRowModel, getPaginationRowModel, useReactTable, type OnChangeFn, type SortingState } from '@tanstack/react-table'
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
 import { Button } from './Button'
-import { Badge } from './Badge'
 
 interface DataTableProps<T> {
   columns: ColumnDef<T, unknown>[]
@@ -17,7 +16,7 @@ interface DataTableProps<T> {
   }
   sorting?: {
     sorting: SortingState
-    onSortingChange: (sorting: SortingState) => void
+    onSortingChange: OnChangeFn<SortingState>
   }
   loading?: boolean
   emptyMessage?: string
@@ -35,7 +34,7 @@ export function DataTable<T>({
   rowKey = 'id',
   onRowClick,
 }: DataTableProps<T>) {
-  const getRowId = typeof rowKey === 'function' ? rowKey : (row: T) => (row as any)[rowKey]
+  const getRowId = typeof rowKey === 'function' ? rowKey : (row: T) => String((row as Record<string, unknown>)[rowKey as string])
 
   const table = useReactTable({
     data,

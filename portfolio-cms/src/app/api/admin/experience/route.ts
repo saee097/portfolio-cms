@@ -51,9 +51,7 @@ export async function POST(request: NextRequest) {
 
     const dataToInsert = {
       ...validation.data,
-      technologies: validation.data.technologies 
-        ? validation.data.technologies.split(',').map((t: string) => t.trim()).filter(Boolean)
-        : [],
+      technologies: validation.data.technologies ?? [],
     }
 
     const { data, error } = await supabase

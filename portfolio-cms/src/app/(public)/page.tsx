@@ -3,18 +3,18 @@ import Link from 'next/link'
 import { ArrowRight, CheckCircle, Code, Database, Globe, Layers, Rocket, Server, Terminal, Users } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { cn } from '@/lib/utils'
+import { formatDate } from '@/lib/utils'
+import { getFeaturedProjects } from '@/services/project.service'
+import { getServices } from '@/services/service.service'
+import { getExperiences } from '@/services/experience.service'
+import { getTestimonials } from '@/services/media.service'
+import type { Project } from '@/types'
 
 export const metadata: Metadata = {
   title: 'Full Stack Developer Portfolio',
   description: 'Full-stack developer specializing in React, Next.js, TypeScript, and modern web technologies.',
 }
-
-const stats = [
-  { value: '50+', label: 'Projects Completed' },
-  { value: '5+', label: 'Years Experience' },
-  { value: '30+', label: 'Happy Clients' },
-  { value: '100%', label: 'Client Satisfaction' },
-]
 
 const techStack = [
   { name: 'React', icon: Code, color: 'text-blue-500', bg: 'bg-blue-500/10' },
@@ -27,130 +27,25 @@ const techStack = [
   { name: 'Docker', icon: Layers, color: 'text-blue-500', bg: 'bg-blue-500/10' },
 ]
 
-const services = [
-  {
-    title: 'Full-Stack Development',
-    description: 'End-to-end web application development from concept to deployment.',
-    icon: Layers,
-    features: ['Frontend & Backend', 'Database Design', 'API Development', 'DevOps'],
-  },
-  {
-    title: 'React & Next.js Development',
-    description: 'Modern React applications with server-side rendering and optimal performance.',
-    icon: Code,
-    features: ['Server Components', 'App Router', 'TypeScript', 'Testing'],
-  },
-  {
-    title: 'REST API Development',
-    description: 'Scalable and secure RESTful APIs with proper documentation.',
-    icon: Server,
-    features: ['OpenAPI/Swagger', 'Authentication', 'Rate Limiting', 'Validation'],
-  },
-  {
-    title: 'Database Integration',
-    description: 'Database design, optimization, and migration services.',
-    icon: Database,
-    features: ['PostgreSQL', 'Supabase', 'Prisma ORM', 'Performance Tuning'],
-  },
-  {
-    title: 'Responsive UI Development',
-    description: 'Pixel-perfect, accessible interfaces that work on all devices.',
-    icon: Globe,
-    features: ['Tailwind CSS', 'Mobile-First', 'Accessibility', 'Cross-Browser'],
-  },
-  {
-    title: 'Performance Optimization',
-    description: 'Improve load times, Core Web Vitals, and user experience.',
-    icon: Rocket,
-    features: ['Code Splitting', 'Caching', 'Image Optimization', 'Bundle Analysis'],
-  },
-]
+async function getHomeData() {
+  const [featuredProjects, services, experiences, testimonials] = await Promise.all([
+    getFeaturedProjects(6),
+    getServices(true),
+    getExperiences(),
+    getTestimonials(true),
+  ])
 
-const featuredProjects = [
-  {
-    title: 'E-Commerce Platform',
-    description: 'Full-stack e-commerce solution with payment integration, inventory management, and admin dashboard.',
-    image: '/projects/ecommerce.jpg',
-    technologies: ['Next.js', 'TypeScript', 'PostgreSQL', 'Stripe'],
-    githubUrl: 'https://github.com',
-    liveUrl: 'https://example.com',
-    category: 'Full-Stack',
-  },
-  {
-    title: 'Task Management App',
-    description: 'Collaborative task management with real-time updates, teams, and project analytics.',
-    image: '/projects/taskmanager.jpg',
-    technologies: ['React', 'Node.js', 'Socket.io', 'MongoDB'],
-    githubUrl: 'https://github.com',
-    liveUrl: 'https://example.com',
-    category: 'SaaS',
-  },
-  {
-    title: 'Analytics Dashboard',
-    description: 'Real-time analytics dashboard with customizable widgets and data visualization.',
-    image: '/projects/analytics.jpg',
-    technologies: ['Next.js', 'TypeScript', 'Recharts', 'PostgreSQL'],
-    githubUrl: 'https://github.com',
-    liveUrl: 'https://example.com',
-    category: 'Dashboard',
-  },
-]
+  return {
+    featuredProjects,
+    services,
+    experiences,
+    testimonials,
+  }
+}
 
-const experiences = [
-  {
-    title: 'Senior Full Stack Developer',
-    company: 'Tech Company Inc.',
-    location: 'San Francisco, CA',
-    period: '2022 - Present',
-    description: 'Leading development of scalable web applications using React, Next.js, and Node.js.',
-    technologies: ['React', 'Next.js', 'TypeScript', 'PostgreSQL', 'AWS'],
-  },
-  {
-    title: 'Full Stack Developer',
-    company: 'StartupXYZ',
-    location: 'New York, NY',
-    period: '2020 - 2022',
-    description: 'Built and maintained multiple client projects from concept to production.',
-    technologies: ['React', 'Node.js', 'Express', 'MongoDB', 'Docker'],
-  },
-  {
-    title: 'Junior Web Developer',
-    company: 'Digital Agency',
-    location: 'Remote',
-    period: '2019 - 2020',
-    description: 'Developed responsive websites and web applications for various clients.',
-    technologies: ['JavaScript', 'Vue.js', 'PHP', 'MySQL', 'WordPress'],
-  },
-]
+export default async function HomePage() {
+  const { featuredProjects, services, experiences, testimonials } = await getHomeData()
 
-const testimonials = [
-  {
-    name: 'Sarah Johnson',
-    position: 'CTO',
-    company: 'TechStart Inc.',
-    message: 'Exceptional developer who delivers high-quality code on time. Great communication and problem-solving skills.',
-    rating: 5,
-    avatar: '/avatars/sarah.jpg',
-  },
-  {
-    name: 'Michael Chen',
-    position: 'Product Manager',
-    company: 'InnovateLabs',
-    message: 'Working with this developer was a pleasure. They understood our requirements perfectly and exceeded expectations.',
-    rating: 5,
-    avatar: '/avatars/michael.jpg',
-  },
-  {
-    name: 'Emily Rodriguez',
-    position: 'Founder',
-    company: 'CreativeStudio',
-    message: 'Outstanding technical skills and attention to detail. The project was delivered ahead of schedule with great quality.',
-    rating: 5,
-    avatar: '/avatars/emily.jpg',
-  },
-]
-
-export default function HomePage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
@@ -190,12 +85,22 @@ export default function HomePage() {
 
           {/* Stats */}
           <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div key={stat.label} className="text-center animate-in fade-in-0 zoom-in-95" style={{ animationDelay: `${index * 100}ms` }}>
-                <div className="text-4xl sm:text-5xl font-bold text-primary-700 dark:text-primary-300">{stat.value}</div>
-                <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">{stat.label}</div>
-              </div>
-            ))}
+            <div className="text-center animate-in fade-in-0 zoom-in-95" style={{ animationDelay: '0ms' }}>
+              <div className="text-4xl sm:text-5xl font-bold text-primary-700 dark:text-primary-300">{experiences.length}+</div>
+              <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">Years Experience</div>
+            </div>
+            <div className="text-center animate-in fade-in-0 zoom-in-95" style={{ animationDelay: '100ms' }}>
+              <div className="text-4xl sm:text-5xl font-bold text-primary-700 dark:text-primary-300">{services.length}+</div>
+              <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">Services Offered</div>
+            </div>
+            <div className="text-center animate-in fade-in-0 zoom-in-95" style={{ animationDelay: '200ms' }}>
+              <div className="text-4xl sm:text-5xl font-bold text-primary-700 dark:text-primary-300">{featuredProjects.length}+</div>
+              <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">Projects Completed</div>
+            </div>
+            <div className="text-center animate-in fade-in-0 zoom-in-95" style={{ animationDelay: '300ms' }}>
+              <div className="text-4xl sm:text-5xl font-bold text-primary-700 dark:text-primary-300">{testimonials.length}+</div>
+              <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">Happy Clients</div>
+            </div>
           </div>
         </div>
 
@@ -249,7 +154,7 @@ export default function HomePage() {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featuredProjects.map((project, index) => (
-              <article key={project.title} className="card group animate-in fade-in-0 slide-in-from-top-2" style={{ animationDelay: `${index * 100}ms` }}>
+              <article key={project.id} className="card group animate-in fade-in-0 slide-in-from-top-2" style={{ animationDelay: `${index * 100}ms` }}>
                 <div className="aspect-video rounded-lg bg-slate-100 dark:bg-slate-800 mb-4 overflow-hidden">
                   <div className="w-full h-full flex items-center justify-center text-slate-400">
                     Project Image
@@ -257,28 +162,28 @@ export default function HomePage() {
                 </div>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-xs font-medium text-primary-700 bg-primary-100 px-2 py-0.5 rounded dark:bg-primary-900/30 dark:text-primary-300">
-                    {project.category}
+                    {project.category || 'General'}
                   </span>
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2 group-hover:text-primary-700 dark:group-hover:text-primary-300 transition-colors">
                   {project.title}
                 </h3>
-                <p className="text-slate-600 dark:text-slate-400 mb-4 line-clamp-3">{project.description}</p>
+                <p className="text-slate-600 dark:text-slate-400 mb-4 line-clamp-3">{project.short_description || project.detailed_description}</p>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {project.technologies.slice(0, 4).map(tech => (
+                  {(project.technologies || []).slice(0, 4).map(tech => (
                     <span key={tech} className="text-xs px-2 py-1 rounded bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                       {tech}
                     </span>
                   ))}
                 </div>
                 <div className="flex gap-2">
-                  {project.githubUrl && (
-                    <Link href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-slate-600 hover:text-primary-700 dark:text-slate-400 dark:hover:text-primary-300 flex items-center gap-1">
+                  {project.github_url && (
+                    <Link href={project.github_url} target="_blank" rel="noopener noreferrer" className="text-sm text-slate-600 hover:text-primary-700 dark:text-slate-400 dark:hover:text-primary-300 flex items-center gap-1">
                       Code
                     </Link>
                   )}
-                  {project.liveUrl && (
-                    <Link href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-slate-600 hover:text-primary-700 dark:text-slate-400 dark:hover:text-primary-300 flex items-center gap-1">
+                  {project.live_url && (
+                    <Link href={project.live_url} target="_blank" rel="noopener noreferrer" className="text-sm text-slate-600 hover:text-primary-700 dark:text-slate-400 dark:hover:text-primary-300 flex items-center gap-1">
                       Live Demo
                       <ArrowRight className="h-3.5 w-3.5" />
                     </Link>
@@ -301,20 +206,22 @@ export default function HomePage() {
             <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-700" />
             <div className="space-y-12">
               {experiences.map((exp, index) => (
-                <div key={exp.title} className="relative pl-20 animate-in fade-in-0 slide-in-from-top-2" style={{ animationDelay: `${index * 100}ms` }}>
+                <div key={exp.id} className="relative pl-20 animate-in fade-in-0 slide-in-from-top-2" style={{ animationDelay: `${index * 100}ms` }}>
                   <div className="absolute left-0 top-2 w-4 h-4 rounded-full bg-primary-600 border-4 border-white dark:border-slate-950 z-10" />
                   <div className="card">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
                       <span className="text-sm font-medium text-primary-700 bg-primary-100 px-2 py-0.5 rounded dark:bg-primary-900/30 dark:text-primary-300">
-                        {exp.period}
+                        {formatDate(exp.start_date)} - {exp.current ? 'Present' : formatDate(exp.end_date!)}
                       </span>
-                      <span className="text-sm text-slate-500 dark:text-slate-400">{exp.location}</span>
+                      {exp.current && (
+                        <span className="text-sm text-slate-500 dark:text-slate-400">Current</span>
+                      )}
                     </div>
                     <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">{exp.title}</h3>
                     <p className="text-lg text-primary-700 dark:text-primary-300 font-medium mb-3">{exp.company}</p>
                     <p className="text-slate-600 dark:text-slate-400 mb-4">{exp.description}</p>
                     <div className="flex flex-wrap gap-2">
-                      {exp.technologies.map(tech => (
+                      {(exp.technologies || []).map(tech => (
                         <span key={tech} className="text-xs px-2 py-1 rounded bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                           {tech}
                         </span>
@@ -337,14 +244,14 @@ export default function HomePage() {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((service, index) => (
-              <div key={service.title} className="card group animate-in fade-in-0" style={{ animationDelay: `${index * 100}ms` }}>
+              <div key={service.id} className="card group animate-in fade-in-0" style={{ animationDelay: `${index * 100}ms` }}>
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-100 dark:bg-primary-900/30">
-                  <service.icon className="h-6 w-6 text-primary-700 dark:text-primary-300" />
+                  <Layers className="h-6 w-6 text-primary-700 dark:text-primary-300" />
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">{service.title}</h3>
-                <p className="text-slate-600 dark:text-slate-400 mb-4">{service.description}</p>
+                <p className="text-slate-600 dark:text-slate-400 mb-4">{service.short_description}</p>
                 <ul className="space-y-2">
-                  {service.features.map((feature, i) => (
+                  {(service.features || []).map((feature, i) => (
                     <li key={i} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                       <CheckCircle className="h-4 w-4 text-primary-600 dark:text-primary-400 flex-shrink-0" />
                       {feature}
@@ -361,8 +268,8 @@ export default function HomePage() {
       <section className="section bg-primary-700 dark:bg-primary-800">
         <div className="container-main">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Let's Build Something Great Together</h2>
-            <p className="text-primary-100 mb-8 text-lg">I'm always open to discussing new projects, creative ideas, or opportunities to be part of your vision.</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Let&apos;s Build Something Great Together</h2>
+            <p className="text-primary-100 mb-8 text-lg">I&apos;m always open to discussing new projects, creative ideas, or opportunities to be part of your vision.</p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link href="/contact">
                 <Button size="lg" variant="secondary" className="w-full sm:w-auto bg-white text-primary-700 hover:bg-primary-50">
@@ -389,19 +296,19 @@ export default function HomePage() {
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {testimonials.map((testimonial, index) => (
-              <div key={testimonial.name} className="card animate-in fade-in-0" style={{ animationDelay: `${index * 100}ms` }}>
+              <div key={testimonial.id} className="card animate-in fade-in-0" style={{ animationDelay: `${index * 100}ms` }}>
                 <div className="flex items-center gap-2 mb-4">
                   {Array.from({ length: testimonial.rating }).map((_, i) => (
                     <span key={i} className="text-yellow-400">★</span>
                   ))}
                 </div>
-                <p className="text-slate-600 dark:text-slate-400 mb-6 italic">"{testimonial.message}"</p>
+                <p className="text-slate-600 dark:text-slate-400 mb-6 italic">&quot;{testimonial.message}&quot;</p>
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 font-medium">
-                    {testimonial.name.split(' ').map(n => n[0]).join('')}
+                    {testimonial.client_name.split(' ').map((n: string) => n[0]).join('')}
                   </div>
                   <div>
-                    <div className="font-medium text-slate-900 dark:text-slate-100">{testimonial.name}</div>
+                    <div className="font-medium text-slate-900 dark:text-slate-100">{testimonial.client_name}</div>
                     <div className="text-sm text-slate-500 dark:text-slate-400">{testimonial.position}, {testimonial.company}</div>
                   </div>
                 </div>

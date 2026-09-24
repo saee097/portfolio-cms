@@ -34,8 +34,9 @@ async function getEducation(id: string) {
   return data
 }
 
-export default async function EducationEditPage({ params }: { params: { id: string } }) {
-  const education = await getEducation(params.id)
+export default async function EducationEditPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const education = await getEducation(id)
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -52,7 +53,7 @@ export default async function EducationEditPage({ params }: { params: { id: stri
 
       {/* Form */}
       <Card className="p-6">
-        <form action={`/api/admin/education/${params.id}`} method="POST" className="space-y-6">
+        <form action={`/api/admin/education/${id}`} method="POST" className="space-y-6">
           <input type="hidden" name="_method" value="PATCH" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="md:col-span-2">
@@ -141,7 +142,7 @@ export default async function EducationEditPage({ params }: { params: { id: stri
               <Save className="h-4 w-4 mr-2" />
               Update Education
             </Button>
-            <form action={`/api/admin/education/${params.id}`} method="POST" onSubmit={(e) => { if (!confirm('Delete this education entry?')) e.preventDefault() }}>
+            <form action={`/api/admin/education/${id}`} method="POST" onSubmit={(e) => { if (!confirm('Delete this education entry?')) e.preventDefault() }}>
               <input type="hidden" name="_method" value="DELETE" />
               <Button type="submit" variant="destructive">
                 <Trash2 className="h-4 w-4 mr-2" />

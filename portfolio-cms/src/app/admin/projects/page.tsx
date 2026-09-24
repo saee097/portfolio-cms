@@ -10,6 +10,7 @@ import { DataTable } from '@/components/ui/DataTable'
 import { createServerClientSupabase } from '@/supabase/server'
 import { formatDate } from '@/lib/utils'
 import { projectSchema } from '@/lib/validations'
+import { ColumnDef } from '@tanstack/react-table'
 
 export const metadata: Metadata = {
   title: 'Projects',
@@ -61,13 +62,23 @@ async function getCategories() {
   return [...new Set(data?.map(p => p.category).filter(Boolean) || [])] as string[]
 }
 
-export default async function AdminProjectsPage({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+export default async function AdminProjectsPage({ searchParams: sp }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const searchParams = await sp
   const [projectsData, categories] = await Promise.all([
     getProjects(searchParams),
     getCategories(),
   ])
 
-  const columns = [
+  const columns: ColumnDef<{
+    id: string
+    title: string
+    short_description?: string | null
+    category?: string | null
+    published: boolean
+    featured: boolean
+    order_index: number
+    updated_at?: string | null
+  }>[] = [
     {
       accessorKey: 'title',
       header: 'Title',

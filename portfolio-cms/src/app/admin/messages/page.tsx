@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowLeft, MessageSquare, Search, Mail, CheckCircle, Clock, Trash2 } from 'lucide-react'
+import { ArrowLeft, MessageSquare, Search, Mail, CheckCircle, Clock, Archive, Trash2 } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -8,6 +8,7 @@ import { DataTable } from '@/components/ui/DataTable'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { createServerClientSupabase } from '@/supabase/server'
+import { ColumnDef } from '@tanstack/react-table'
 
 export const metadata: Metadata = {
   title: 'Messages',
@@ -21,11 +22,12 @@ async function getMessages(searchParams: { [key: string]: string | string[] | un
   const search = searchParams.search as string || ''
   const status = searchParams.status as string || ''
 
-  let query = supabase.from('messages').select('*', { count: 'exact' })
+  let query = supabase.from('contact_messages').select('*', { count: 'exact' })
 
-  if (status === 'read') query = query.eq('read', true)
-  else if (status === 'unread') query = query.eq('read', false)
-  else if (status === 'archived') query = query.eq('archived', true)
+  if (status === 'archived') query = query.eq('status', 'archived')
+  else if (status === 'replied') query = query.eq('status', 'replied')
+  else if (status === 'read') query = query.eq('status', 'read')
+  else if (status === 'new') query = query.eq('status', 'new')
 
   if (search) {
     query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%,subject.ilike.%${search}%`)
@@ -46,7 +48,14 @@ async function getMessages(searchParams: { [key: string]: string | string[] | un
   }
 }
 
-const columns = [
+const columns: ColumnDef<{
+  id: string
+  name: string
+  email: string
+  subject: string
+  status: string
+  created_at: string
+}>[] = [
   {
     accessorKey: 'name',
     header: 'Sender',
@@ -68,12 +77,12 @@ const columns = [
     accessorKey: 'status',
     header: 'Status',
     cell: ({ row }) => {
-      if (row.original.archived) return <Badge variant="secondary" className="text-xs">Archived</Badge>
-      return row.original.read ? (
-        <Badge variant="success" className="text-xs"><CheckCircle className="h-3 w-3 mr-1" /> Read</Badge>
-      ) : (
-        <Badge variant="warning" className="text-xs"><Clock className="h-3 w-3 mr-1" /> Unread</Badge>
-      )
+      switch (row.original.status) {
+        case 'archived': return <Badge variant="secondary" className="text-xs"><Archive className="h-3 w-3 mr-1" /> Archived</Badge>
+        case 'replied': return <Badge variant="success" className="text-xs"><CheckCircle className="h-3 w-3 mr-1" /> Replied</Badge>
+        case 'read': return <Badge variant="success" className="text-xs"><CheckCircle className="h-3 w-3 mr-1" /> Read</Badge>
+        default: return <Badge variant="warning" className="text-xs"><Clock className="h-3 w-3 mr-1" /> New</Badge>
+      }
     },
   },
   {
@@ -97,7 +106,8 @@ const columns = [
   },
 ]
 
-export default async function MessagesPage({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+export default async function MessagesPage({ searchParams: sp }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const searchParams = await sp
   const messagesData = await getMessages(searchParams)
 
   return (
@@ -118,19 +128,19 @@ export default async function MessagesPage({ searchParams }: { searchParams: { [
         </Card>
         <Card className="text-center">
           <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-            {messagesData.data.filter(m => !m.read && !m.archived).length}
+            {messagesData.data.filter(m => m.status === 'new').length}
           </p>
           <p className="text-sm text-slate-500 dark:text-slate-400">Unread</p>
         </Card>
         <Card className="text-center">
           <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-            {messagesData.data.filter(m => m.read && !m.archived).length}
+            {messagesData.data.filter(m => m.status === 'read' || m.status === 'replied').length}
           </p>
           <p className="text-sm text-slate-500 dark:text-slate-400">Read</p>
         </Card>
         <Card className="text-center">
           <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-            {messagesData.data.filter(m => m.archived).length}
+            {messagesData.data.filter(m => m.status === 'archived').length}
           </p>
           <p className="text-sm text-slate-500 dark:text-slate-400">Archived</p>
         </Card>
@@ -149,8 +159,9 @@ export default async function MessagesPage({ searchParams }: { searchParams: { [
             placeholder="All Status"
             options={[
               { value: '', label: 'All Status' },
-              { value: 'unread', label: 'Unread' },
+              { value: 'new', label: 'New' },
               { value: 'read', label: 'Read' },
+              { value: 'replied', label: 'Replied' },
               { value: 'archived', label: 'Archived' },
             ]}
           />

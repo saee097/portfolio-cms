@@ -25,7 +25,7 @@ export function Modal({ open, onOpenChange, title, description, children, size =
     full: 'max-w-4xl',
   }
 
-  const handleKeyDown = (e: KeyboardEvent) => {
+  const handleKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
     if (e.key === 'Escape') onOpenChange(false)
   }
 

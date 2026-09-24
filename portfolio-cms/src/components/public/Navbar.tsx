@@ -37,6 +37,9 @@ export function Navbar() {
   }, [])
 
   useEffect(() => {
+    // Close the mobile menu on navigation. This is an intentional
+    // state-sync effect, so the rule is bypassed here.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileMenuOpen(false)
   }, [pathname])
 
@@ -79,7 +82,7 @@ export function Navbar() {
               variant="ghost"
               size="icon"
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-label="Toggle theme"
             >
               <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
               <Moon className="h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
@@ -94,7 +97,7 @@ export function Navbar() {
               variant="ghost"
               size="icon"
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              aria-label="Toggle theme"
             >
               <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
               <Moon className="h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />

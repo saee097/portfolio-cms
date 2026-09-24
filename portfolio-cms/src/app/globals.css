@@ -154,3 +154,24 @@ h1, h2, h3, h4, h5, h6 {
     @apply block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5;
   }
 }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .section {
+    page-break-inside: avoid;
+  }
+
+  .card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #e2e8f0;
+  }
+}

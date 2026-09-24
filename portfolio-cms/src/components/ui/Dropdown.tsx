@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, ReactNode } from 'react'
+import { Fragment, ReactNode, useState, useRef, useEffect } from 'react'
 import { X, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from './Button'
@@ -14,7 +14,7 @@ interface DropdownProps {
 
 export function Dropdown({ trigger, content, align = 'end', sideOffset = 4 }: DropdownProps) {
   const [open, setOpen] = useState(false)
-  const triggerRef = useRef<HTMLButtonElement>(null)
+  const triggerRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {

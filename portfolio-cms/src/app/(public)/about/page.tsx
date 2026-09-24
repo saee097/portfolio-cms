@@ -2,6 +2,9 @@ import { Metadata } from 'next'
 import { Award, Brain, Heart, Lightbulb, Target, TrendingUp } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
+import { getExperiences } from '@/services/experience.service'
+import { formatDate } from '@/lib/utils'
+import type { Experience } from '@/types'
 
 export const metadata: Metadata = {
   title: 'About',
@@ -17,41 +20,15 @@ const strengths = [
   { title: 'Goal Oriented', description: 'Delivering projects on time with clear communication and transparent processes.', icon: Target },
 ]
 
-const stats = [
-  { value: '5+', label: 'Years of Experience' },
-  { value: '50+', label: 'Projects Delivered' },
-  { value: '30+', label: 'Technologies Mastered' },
-  { value: '100%', label: 'Client Satisfaction' },
-]
+function getYearRange(exp: Experience) {
+  const start = new Date(exp.start_date).getFullYear()
+  const end = exp.current ? 'Present' : (exp.end_date ? new Date(exp.end_date).getFullYear() : 'Present')
+  return `${start} - ${end}`
+}
 
-const timeline = [
-  {
-    year: '2024',
-    title: 'Senior Full Stack Developer',
-    company: 'Tech Company Inc.',
-    description: 'Leading architecture decisions for scalable web applications. Mentoring junior developers and establishing coding standards.',
-  },
-  {
-    year: '2022',
-    title: 'Full Stack Developer',
-    company: 'StartupXYZ',
-    description: 'Built multiple SaaS products from scratch. Implemented CI/CD pipelines and improved deployment frequency by 300%.',
-  },
-  {
-    year: '2020',
-    title: 'Junior Web Developer',
-    company: 'Digital Agency',
-    description: 'Developed responsive websites for diverse clients. Learned modern JavaScript frameworks and backend development.',
-  },
-  {
-    year: '2019',
-    title: 'Computer Science Graduate',
-    company: 'University of Technology',
-    description: 'Graduated with honors. Focused on software engineering, algorithms, and distributed systems.',
-  },
-]
+export default async function AboutPage() {
+  const experiences = await getExperiences()
 
-export default function AboutPage() {
   return (
     <div className="space-y-24">
       {/* Hero Section */}
@@ -77,7 +54,7 @@ export default function AboutPage() {
               <h2 className="section-title">Professional Background</h2>
               <p className="section-subtitle max-w-none">
                 My journey in software development started with a curiosity for how things work on the web.
-                Over the past 5 years, I've had the privilege of working with startups, agencies, and enterprise companies,
+                Over the past 5 years, I&apos;ve had the privilege of working with startups, agencies, and enterprise companies,
                 delivering solutions that solve real business problems.
               </p>
               <div className="mt-8 space-y-4">
@@ -86,8 +63,8 @@ export default function AboutPage() {
                   with pragmatic solutions — choosing the right tool for the job rather than following trends blindly.
                 </p>
                 <p className="text-slate-600 dark:text-slate-400">
-                  When I'm not coding, you'll find me contributing to open-source projects, writing technical articles,
-                  or exploring new technologies. I'm a strong advocate for developer experience, accessibility,
+                When I&apos;m not coding, you&apos;ll find me contributing to open-source projects, writing technical articles,
+                or exploring new technologies. I&apos;m a strong advocate for developer experience, accessibility,
                   and building inclusive digital products.
                 </p>
               </div>
@@ -140,18 +117,28 @@ export default function AboutPage() {
           <div className="relative max-w-2xl mx-auto">
             <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-slate-200 dark:bg-slate-700" />
             <div className="space-y-12">
-              {timeline.map((item, index) => (
-                <div key={item.year} className="relative pl-20">
+              {experiences.map((exp, index) => (
+                <div key={exp.id} className="relative pl-20">
                   <div className="absolute left-0 top-2 w-4 h-4 rounded-full bg-primary-600 border-4 border-white dark:border-slate-950 z-10" />
                   <div className="card">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-sm font-medium text-primary-700 bg-primary-100 px-2 py-0.5 rounded dark:bg-primary-900/30 dark:text-primary-300">
-                        {item.year}
+                        {getYearRange(exp)}
                       </span>
+                      {exp.location && (
+                        <span className="text-sm text-slate-500 dark:text-slate-400">{exp.location}</span>
+                      )}
                     </div>
-                    <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">{item.title}</h3>
-                    <p className="text-lg text-primary-700 dark:text-primary-300 font-medium mb-2">{item.company}</p>
-                    <p className="text-slate-600 dark:text-slate-400">{item.description}</p>
+                    <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">{exp.title}</h3>
+                    <p className="text-lg text-primary-700 dark:text-primary-300 font-medium mb-2">{exp.company}</p>
+                    {exp.description && <p className="text-slate-600 dark:text-slate-400">{exp.description}</p>}
+                    {exp.technologies && exp.technologies.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {exp.technologies.map(tech => (
+                          <Badge key={tech} variant="secondary" className="text-xs">{tech}</Badge>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -164,12 +151,22 @@ export default function AboutPage() {
       <section className="section bg-primary-700 dark:bg-primary-800">
         <div className="container-main">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-4xl sm:text-5xl font-bold text-white mb-2">{stat.value}</div>
-                <div className="text-primary-100">{stat.label}</div>
-              </div>
-            ))}
+            <div className="text-center">
+              <div className="text-4xl sm:text-5xl font-bold text-white mb-2">{experiences.length}+</div>
+              <div className="text-primary-100">Positions Held</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl sm:text-5xl font-bold text-white mb-2">5+</div>
+              <div className="text-primary-100">Years Experience</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl sm:text-5xl font-bold text-white mb-2">30+</div>
+              <div className="text-primary-100">Technologies Mastered</div>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl sm:text-5xl font-bold text-white mb-2">100%</div>
+              <div className="text-primary-100">Client Satisfaction</div>
+            </div>
           </div>
         </div>
       </section>

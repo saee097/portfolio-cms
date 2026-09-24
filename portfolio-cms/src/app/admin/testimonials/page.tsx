@@ -8,6 +8,7 @@ import { DataTable } from '@/components/ui/DataTable'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { createServerClientSupabase } from '@/supabase/server'
+import { ColumnDef } from '@tanstack/react-table'
 
 export const metadata: Metadata = {
   title: 'Testimonials',
@@ -45,7 +46,15 @@ async function getTestimonials(searchParams: { [key: string]: string | string[] 
   }
 }
 
-const columns = [
+const columns: ColumnDef<{
+  id: string
+  client_name: string
+  position?: string | null
+  company?: string | null
+  rating: number
+  published: boolean
+  order_index: number
+}>[] = [
   {
     accessorKey: 'client_name',
     header: 'Client',
@@ -97,7 +106,8 @@ const columns = [
   },
 ]
 
-export default async function TestimonialsPage({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+export default async function TestimonialsPage({ searchParams: sp }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const searchParams = await sp
   const testimonialsData = await getTestimonials(searchParams)
 
   return (

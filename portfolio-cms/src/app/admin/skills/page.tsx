@@ -9,6 +9,7 @@ import { Select } from '@/components/ui/Select'
 import { DataTable } from '@/components/ui/DataTable'
 import { createServerClientSupabase } from '@/supabase/server'
 import { skillSchema, skillCategorySchema } from '@/lib/validations'
+import { ColumnDef } from '@tanstack/react-table'
 
 export const metadata: Metadata = {
   title: 'Skills',
@@ -29,7 +30,14 @@ async function getSkills() {
   }
 }
 
-const columns = [
+const columns: ColumnDef<{
+  id: string
+  name: string
+  icon?: string | null
+  proficiency: number
+  category?: { name?: string } | null
+  order_index: number
+}>[] = [
   {
     accessorKey: 'name',
     header: 'Skill',

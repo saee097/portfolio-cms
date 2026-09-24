@@ -31,7 +31,7 @@ export async function GET(
       .eq('post_id', id)
     
     const tagIds = tags?.map(t => t.tag_id) || []
-    let tagData: any[] = []
+    let tagData: Array<Record<string, unknown>> = []
     if (tagIds.length > 0) {
       const { data } = await supabase.from('blog_tags').select('*').in('id', tagIds)
       tagData = data || []
@@ -63,7 +63,7 @@ export async function PATCH(
 
     const { tag_ids, ...postData } = validation.data
 
-    const updateData: any = { ...postData, updated_at: new Date().toISOString() }
+    const updateData: Record<string, unknown> = { ...postData, updated_at: new Date().toISOString() }
     
     if (postData.content) {
       updateData.reading_time = Math.ceil(postData.content.split(/\s+/).length / 200)
@@ -83,14 +83,14 @@ export async function PATCH(
     if (error) throw error
 
     // Handle tags if provided
-    if (tag_ids !== undefined) {
+    if (Array.isArray(tag_ids)) {
       await supabase.from('blog_post_tags').delete().eq('post_id', id)
-      
+
       if (tag_ids.length > 0) {
         const { error: tagsError } = await supabase
           .from('blog_post_tags')
           .insert(tag_ids.map((tag_id: string) => ({ post_id: id, tag_id })))
-        
+
         if (tagsError) throw tagsError
       }
     }

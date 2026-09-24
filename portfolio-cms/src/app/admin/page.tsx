@@ -1,11 +1,11 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowRight, FolderGit2, PenTool, MessageSquare, Eye, TrendingUp, Users, Clock, CheckCircle, AlertCircle } from 'lucide-react'
+import { ArrowRight, FolderGit2, PenTool, MessageSquare, Eye, TrendingUp, Users, Clock, CheckCircle, AlertCircle, Code, Image } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { createServerClientSupabase } from '@/supabase/server'
-import { formatDate, formatRelativeTime } from '@/lib/utils'
+import { cn, formatDate, formatRelativeTime } from '@/lib/utils'
 
 export const metadata: Metadata = {
   title: 'Dashboard',

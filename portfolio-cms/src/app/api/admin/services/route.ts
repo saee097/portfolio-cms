@@ -55,9 +55,7 @@ export async function POST(request: NextRequest) {
 
     const dataToInsert = {
       ...validation.data,
-      features: validation.data.features 
-        ? validation.data.features.split('\n').map((f: string) => f.trim()).filter(Boolean)
-        : [],
+      features: validation.data.features ?? [],
     }
 
     const { data, error } = await supabase

@@ -8,6 +8,7 @@ import { DataTable } from '@/components/ui/DataTable'
 import { Input } from '@/components/ui/Input'
 import { createServerClientSupabase } from '@/supabase/server'
 import { formatDate } from '@/lib/utils'
+import { ColumnDef } from '@tanstack/react-table'
 
 export const metadata: Metadata = {
   title: 'Education',
@@ -41,7 +42,16 @@ async function getEducation(searchParams: { [key: string]: string | string[] | u
   }
 }
 
-const columns = [
+const columns: ColumnDef<{
+  id: string
+  degree: string
+  institution: string
+  location?: string | null
+  current: boolean
+  start_date: string
+  end_date?: string | null
+  order_index: number
+}>[] = [
   {
     accessorKey: 'degree',
     header: 'Degree',
@@ -99,7 +109,8 @@ const columns = [
   },
 ]
 
-export default async function EducationPage({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+export default async function EducationPage({ searchParams: sp }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const searchParams = await sp
   const educationData = await getEducation(searchParams)
 
   return (
