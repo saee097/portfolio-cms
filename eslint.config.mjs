@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Nested duplicate project tree — not part of the app build
+    "portfolio-cms/**",
   ]),
 ]);
 
