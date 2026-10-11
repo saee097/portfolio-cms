@@ -34,9 +34,9 @@ function DatabaseSetupNotice({ sqlEditorUrl }: { sqlEditorUrl: string | null }) 
 
   const steps = [
     'Open your Supabase project → SQL Editor',
-    'Run the contents of supabase/schema.sql',
-    'Run supabase/migrations/20261004_contact_messages_enrichment.sql',
-    'Return here and reload',
+    'Paste and run the full contents of supabase/schema.sql (idempotent — safe to re-run)',
+    'Optional: run supabase/migrations/20261004_contact_messages_enrichment.sql if upgrading an older DB',
+    'Return here and click Check again',
   ]
 
   return (

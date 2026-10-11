@@ -1,5 +1,6 @@
 -- Enrichment for the public contact form.
 -- Idempotent: safe to run against a database that already has these columns.
+-- Also included in supabase/schema.sql — running both is harmless.
 
 ALTER TABLE contact_messages
     ADD COLUMN IF NOT EXISTS company TEXT,

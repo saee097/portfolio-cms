@@ -3,10 +3,10 @@ import { Github, Linkedin, Twitter, Mail, ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const socialLinks = [
-  { name: 'GitHub', href: 'https://github.com', icon: Github },
-  { name: 'LinkedIn', href: 'https://linkedin.com', icon: Linkedin },
+  { name: 'GitHub', href: 'https://github.com/saee097', icon: Github },
+  { name: 'LinkedIn', href: 'www.linkedin.com/in/saeed-ur-rahman-dev', icon: Linkedin },
   { name: 'Twitter', href: 'https://twitter.com', icon: Twitter },
-  { name: 'Email', href: 'mailto:hello@example.com', icon: Mail },
+  { name: 'Email', href: 'mailto:saeedsaeed7745@gmail.com', icon: Mail },
 ]
 
 const footerNavigation = {
@@ -117,22 +117,7 @@ export function Footer() {
                 </ul>
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-slate-600 dark:text-slate-100">Connect</h3>
-                <ul className="mt-4 space-y-3">
-                  {socialLinks.map(social => (
-                    <li key={social.name}>
-                      <a
-                        href={social.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-sm text-slate-600 hover:text-primary-600 dark:text-slate-400 dark:hover:text-primary-400 transition-colors"
-                      >
-                        <social.icon className="h-4 w-4" />
-                        {social.name}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
+              
               </div>
             </div>
           </div>

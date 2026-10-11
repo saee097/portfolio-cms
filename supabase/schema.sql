@@ -1,11 +1,11 @@
 -- Portfolio CMS Database Schema
--- Run this in your Supabase SQL Editor
+-- Idempotent: safe to re-run in the Supabase SQL Editor.
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Profiles table (extends Supabase Auth users)
-CREATE TABLE profiles (
+CREATE TABLE IF NOT EXISTS profiles (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL UNIQUE,
     full_name TEXT,
@@ -24,7 +24,7 @@ CREATE TABLE profiles (
 );
 
 -- Projects table
-CREATE TABLE projects (
+CREATE TABLE IF NOT EXISTS projects (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title TEXT NOT NULL,
     slug TEXT NOT NULL UNIQUE,
@@ -49,7 +49,7 @@ CREATE TABLE projects (
 );
 
 -- Project images table
-CREATE TABLE project_images (
+CREATE TABLE IF NOT EXISTS project_images (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     project_id UUID REFERENCES projects(id) ON DELETE CASCADE NOT NULL,
     url TEXT NOT NULL,
@@ -59,7 +59,7 @@ CREATE TABLE project_images (
 );
 
 -- Skill categories table
-CREATE TABLE skill_categories (
+CREATE TABLE IF NOT EXISTS skill_categories (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL,
     slug TEXT NOT NULL UNIQUE,
@@ -71,7 +71,7 @@ CREATE TABLE skill_categories (
 );
 
 -- Skills table
-CREATE TABLE skills (
+CREATE TABLE IF NOT EXISTS skills (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL,
     icon TEXT,
@@ -83,7 +83,7 @@ CREATE TABLE skills (
 );
 
 -- Experiences table
-CREATE TABLE experiences (
+CREATE TABLE IF NOT EXISTS experiences (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title TEXT NOT NULL,
     company TEXT NOT NULL,
@@ -99,7 +99,7 @@ CREATE TABLE experiences (
 );
 
 -- Education table
-CREATE TABLE education (
+CREATE TABLE IF NOT EXISTS education (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     degree TEXT NOT NULL,
     institution TEXT NOT NULL,
@@ -114,7 +114,7 @@ CREATE TABLE education (
 );
 
 -- Services table
-CREATE TABLE services (
+CREATE TABLE IF NOT EXISTS services (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title TEXT NOT NULL,
     slug TEXT NOT NULL UNIQUE,
@@ -129,7 +129,7 @@ CREATE TABLE services (
 );
 
 -- Blog categories table
-CREATE TABLE blog_categories (
+CREATE TABLE IF NOT EXISTS blog_categories (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL,
     slug TEXT NOT NULL UNIQUE,
@@ -139,7 +139,7 @@ CREATE TABLE blog_categories (
 );
 
 -- Blog tags table
-CREATE TABLE blog_tags (
+CREATE TABLE IF NOT EXISTS blog_tags (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL,
     slug TEXT NOT NULL UNIQUE,
@@ -147,7 +147,7 @@ CREATE TABLE blog_tags (
 );
 
 -- Blog posts table
-CREATE TABLE blog_posts (
+CREATE TABLE IF NOT EXISTS blog_posts (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     title TEXT NOT NULL,
     slug TEXT NOT NULL UNIQUE,
@@ -167,14 +167,14 @@ CREATE TABLE blog_posts (
 );
 
 -- Blog post tags junction table
-CREATE TABLE blog_post_tags (
+CREATE TABLE IF NOT EXISTS blog_post_tags (
     post_id UUID REFERENCES blog_posts(id) ON DELETE CASCADE NOT NULL,
     tag_id UUID REFERENCES blog_tags(id) ON DELETE CASCADE NOT NULL,
     PRIMARY KEY (post_id, tag_id)
 );
 
 -- Testimonials table
-CREATE TABLE testimonials (
+CREATE TABLE IF NOT EXISTS testimonials (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     client_name TEXT NOT NULL,
     position TEXT NOT NULL,
@@ -189,7 +189,7 @@ CREATE TABLE testimonials (
 );
 
 -- Contact messages table
-CREATE TABLE contact_messages (
+CREATE TABLE IF NOT EXISTS contact_messages (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL,
     email TEXT NOT NULL,
@@ -207,7 +207,7 @@ CREATE TABLE contact_messages (
 );
 
 -- Media table
-CREATE TABLE media (
+CREATE TABLE IF NOT EXISTS media (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name TEXT NOT NULL,
     url TEXT NOT NULL,
@@ -220,7 +220,7 @@ CREATE TABLE media (
 );
 
 -- Site settings table
-CREATE TABLE site_settings (
+CREATE TABLE IF NOT EXISTS site_settings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     key TEXT NOT NULL UNIQUE,
     value JSONB,
@@ -230,7 +230,7 @@ CREATE TABLE site_settings (
 );
 
 -- SEO settings table
-CREATE TABLE seo_settings (
+CREATE TABLE IF NOT EXISTS seo_settings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     page TEXT NOT NULL UNIQUE,
     title TEXT,
@@ -249,7 +249,7 @@ CREATE TABLE seo_settings (
 );
 
 -- Analytics events table
-CREATE TABLE analytics_events (
+CREATE TABLE IF NOT EXISTS analytics_events (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     event_name TEXT NOT NULL,
     page_url TEXT,
@@ -260,31 +260,38 @@ CREATE TABLE analytics_events (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Indexes for performance
-CREATE INDEX idx_projects_published ON projects(published);
-CREATE INDEX idx_projects_featured ON projects(featured);
-CREATE INDEX idx_projects_category ON projects(category);
-CREATE INDEX idx_projects_slug ON projects(slug);
-CREATE INDEX idx_projects_created_by ON projects(created_by);
-CREATE INDEX idx_project_images_project_id ON project_images(project_id);
-CREATE INDEX idx_skills_category_id ON skills(category_id);
-CREATE INDEX idx_experiences_start_date ON experiences(start_date DESC);
-CREATE INDEX idx_education_start_date ON education(start_date DESC);
-CREATE INDEX idx_blog_posts_status ON blog_posts(status);
-CREATE INDEX idx_blog_posts_category_id ON blog_posts(category_id);
-CREATE INDEX idx_blog_posts_slug ON blog_posts(slug);
-CREATE INDEX idx_blog_posts_published_at ON blog_posts(published_at DESC);
-CREATE INDEX idx_blog_post_tags_post_id ON blog_post_tags(post_id);
-CREATE INDEX idx_testimonials_published ON testimonials(published);
-CREATE INDEX idx_contact_messages_status ON contact_messages(status);
-CREATE INDEX idx_contact_messages_created_at ON contact_messages(created_at DESC);
-CREATE INDEX idx_contact_messages_ip_created ON contact_messages(ip_address, created_at DESC);
-CREATE INDEX idx_contact_messages_topic ON contact_messages(topic);
-CREATE INDEX idx_media_bucket ON media(bucket);
-CREATE INDEX idx_analytics_events_event_name ON analytics_events(event_name);
-CREATE INDEX idx_analytics_events_created_at ON analytics_events(created_at DESC);
+-- Enrichment for older contact_messages tables (no-op when columns already exist)
+ALTER TABLE contact_messages
+    ADD COLUMN IF NOT EXISTS company TEXT,
+    ADD COLUMN IF NOT EXISTS topic TEXT,
+    ADD COLUMN IF NOT EXISTS budget TEXT,
+    ADD COLUMN IF NOT EXISTS timeline TEXT;
 
--- Row Level Security (RLS) Policies
+-- Indexes for performance
+CREATE INDEX IF NOT EXISTS idx_projects_published ON projects(published);
+CREATE INDEX IF NOT EXISTS idx_projects_featured ON projects(featured);
+CREATE INDEX IF NOT EXISTS idx_projects_category ON projects(category);
+CREATE INDEX IF NOT EXISTS idx_projects_slug ON projects(slug);
+CREATE INDEX IF NOT EXISTS idx_projects_created_by ON projects(created_by);
+CREATE INDEX IF NOT EXISTS idx_project_images_project_id ON project_images(project_id);
+CREATE INDEX IF NOT EXISTS idx_skills_category_id ON skills(category_id);
+CREATE INDEX IF NOT EXISTS idx_experiences_start_date ON experiences(start_date DESC);
+CREATE INDEX IF NOT EXISTS idx_education_start_date ON education(start_date DESC);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_status ON blog_posts(status);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_category_id ON blog_posts(category_id);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_slug ON blog_posts(slug);
+CREATE INDEX IF NOT EXISTS idx_blog_posts_published_at ON blog_posts(published_at DESC);
+CREATE INDEX IF NOT EXISTS idx_blog_post_tags_post_id ON blog_post_tags(post_id);
+CREATE INDEX IF NOT EXISTS idx_testimonials_published ON testimonials(published);
+CREATE INDEX IF NOT EXISTS idx_contact_messages_status ON contact_messages(status);
+CREATE INDEX IF NOT EXISTS idx_contact_messages_created_at ON contact_messages(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_contact_messages_ip_created ON contact_messages(ip_address, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_contact_messages_topic ON contact_messages(topic);
+CREATE INDEX IF NOT EXISTS idx_media_bucket ON media(bucket);
+CREATE INDEX IF NOT EXISTS idx_analytics_events_event_name ON analytics_events(event_name);
+CREATE INDEX IF NOT EXISTS idx_analytics_events_created_at ON analytics_events(created_at DESC);
+
+-- Row Level Security (RLS)
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
 ALTER TABLE project_images ENABLE ROW LEVEL SECURITY;
@@ -304,214 +311,258 @@ ALTER TABLE site_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE seo_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE analytics_events ENABLE ROW LEVEL SECURITY;
 
--- Public read policies (for published content)
-CREATE POLICY "Public can view published projects" ON projects
-    FOR SELECT USING (published = TRUE);
-
-CREATE POLICY "Public can view project images for published projects" ON project_images
-    FOR SELECT USING (
-        EXISTS (SELECT 1 FROM projects WHERE projects.id = project_images.project_id AND projects.published = TRUE)
-    );
-
-CREATE POLICY "Public can view skills" ON skills FOR SELECT USING (TRUE);
-CREATE POLICY "Public can view skill categories" ON skill_categories FOR SELECT USING (TRUE);
-CREATE POLICY "Public can view experiences" ON experiences FOR SELECT USING (TRUE);
-CREATE POLICY "Public can view education" ON education FOR SELECT USING (TRUE);
-CREATE POLICY "Public can view published services" ON services FOR SELECT USING (published = TRUE);
-CREATE POLICY "Public can view blog categories" ON blog_categories FOR SELECT USING (TRUE);
-CREATE POLICY "Public can view blog tags" ON blog_tags FOR SELECT USING (TRUE);
-CREATE POLICY "Public can view published blog posts" ON blog_posts FOR SELECT USING (status = 'published');
-CREATE POLICY "Public can view blog post tags" ON blog_post_tags FOR SELECT USING (TRUE);
-CREATE POLICY "Public can view published testimonials" ON testimonials FOR SELECT USING (published = TRUE);
-CREATE POLICY "Public can view site settings" ON site_settings FOR SELECT USING (TRUE);
-CREATE POLICY "Public can view SEO settings" ON seo_settings FOR SELECT USING (TRUE);
-
--- Role lookup helper. SECURITY DEFINER is required: a policy on `profiles` that
--- queries `profiles` directly is rejected by Postgres with
--- "infinite recursion detected in policy for relation profiles".
--- Owned by the table owner, so it reads `profiles` while bypassing RLS.
+-- Role lookup helper. SECURITY DEFINER avoids infinite recursion on profiles policies.
 CREATE OR REPLACE FUNCTION current_user_role()
 RETURNS TEXT AS $$
     SELECT role FROM profiles WHERE user_id = auth.uid() LIMIT 1;
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
 
--- Admin policies (authenticated users with admin role)
+-- Public read policies
+DROP POLICY IF EXISTS "Public can view published projects" ON projects;
+CREATE POLICY "Public can view published projects" ON projects
+    FOR SELECT USING (published = TRUE);
+
+DROP POLICY IF EXISTS "Public can view project images for published projects" ON project_images;
+CREATE POLICY "Public can view project images for published projects" ON project_images
+    FOR SELECT USING (
+        EXISTS (SELECT 1 FROM projects WHERE projects.id = project_images.project_id AND projects.published = TRUE)
+    );
+
+DROP POLICY IF EXISTS "Public can view skills" ON skills;
+CREATE POLICY "Public can view skills" ON skills FOR SELECT USING (TRUE);
+
+DROP POLICY IF EXISTS "Public can view skill categories" ON skill_categories;
+CREATE POLICY "Public can view skill categories" ON skill_categories FOR SELECT USING (TRUE);
+
+DROP POLICY IF EXISTS "Public can view experiences" ON experiences;
+CREATE POLICY "Public can view experiences" ON experiences FOR SELECT USING (TRUE);
+
+DROP POLICY IF EXISTS "Public can view education" ON education;
+CREATE POLICY "Public can view education" ON education FOR SELECT USING (TRUE);
+
+DROP POLICY IF EXISTS "Public can view published services" ON services;
+CREATE POLICY "Public can view published services" ON services FOR SELECT USING (published = TRUE);
+
+DROP POLICY IF EXISTS "Public can view blog categories" ON blog_categories;
+CREATE POLICY "Public can view blog categories" ON blog_categories FOR SELECT USING (TRUE);
+
+DROP POLICY IF EXISTS "Public can view blog tags" ON blog_tags;
+CREATE POLICY "Public can view blog tags" ON blog_tags FOR SELECT USING (TRUE);
+
+DROP POLICY IF EXISTS "Public can view published blog posts" ON blog_posts;
+CREATE POLICY "Public can view published blog posts" ON blog_posts FOR SELECT USING (status = 'published');
+
+DROP POLICY IF EXISTS "Public can view blog post tags" ON blog_post_tags;
+CREATE POLICY "Public can view blog post tags" ON blog_post_tags FOR SELECT USING (TRUE);
+
+DROP POLICY IF EXISTS "Public can view published testimonials" ON testimonials;
+CREATE POLICY "Public can view published testimonials" ON testimonials FOR SELECT USING (published = TRUE);
+
+DROP POLICY IF EXISTS "Public can view site settings" ON site_settings;
+CREATE POLICY "Public can view site settings" ON site_settings FOR SELECT USING (TRUE);
+
+DROP POLICY IF EXISTS "Public can view SEO settings" ON seo_settings;
+CREATE POLICY "Public can view SEO settings" ON seo_settings FOR SELECT USING (TRUE);
+
+-- Admin policies
+DROP POLICY IF EXISTS "Admins can manage profiles" ON profiles;
 CREATE POLICY "Admins can manage profiles" ON profiles
     FOR ALL USING (
         (SELECT current_user_role()) IN ('super_admin', 'admin')
     );
 
+DROP POLICY IF EXISTS "Admins can manage projects" ON projects;
 CREATE POLICY "Admins can manage projects" ON projects
     FOR ALL USING (
         EXISTS (
-            SELECT 1 FROM profiles p 
-            WHERE p.user_id = auth.uid() 
+            SELECT 1 FROM profiles p
+            WHERE p.user_id = auth.uid()
             AND p.role IN ('super_admin', 'admin', 'editor')
         )
     );
 
+DROP POLICY IF EXISTS "Admins can manage project images" ON project_images;
 CREATE POLICY "Admins can manage project images" ON project_images
     FOR ALL USING (
         EXISTS (
-            SELECT 1 FROM profiles p 
-            WHERE p.user_id = auth.uid() 
+            SELECT 1 FROM profiles p
+            WHERE p.user_id = auth.uid()
             AND p.role IN ('super_admin', 'admin', 'editor')
         )
     );
 
+DROP POLICY IF EXISTS "Admins can manage skills" ON skills;
 CREATE POLICY "Admins can manage skills" ON skills
     FOR ALL USING (
         EXISTS (
-            SELECT 1 FROM profiles p 
-            WHERE p.user_id = auth.uid() 
+            SELECT 1 FROM profiles p
+            WHERE p.user_id = auth.uid()
             AND p.role IN ('super_admin', 'admin', 'editor')
         )
     );
 
+DROP POLICY IF EXISTS "Admins can manage skill categories" ON skill_categories;
 CREATE POLICY "Admins can manage skill categories" ON skill_categories
     FOR ALL USING (
         EXISTS (
-            SELECT 1 FROM profiles p 
-            WHERE p.user_id = auth.uid() 
+            SELECT 1 FROM profiles p
+            WHERE p.user_id = auth.uid()
             AND p.role IN ('super_admin', 'admin', 'editor')
         )
     );
 
+DROP POLICY IF EXISTS "Admins can manage experiences" ON experiences;
 CREATE POLICY "Admins can manage experiences" ON experiences
     FOR ALL USING (
         EXISTS (
-            SELECT 1 FROM profiles p 
-            WHERE p.user_id = auth.uid() 
+            SELECT 1 FROM profiles p
+            WHERE p.user_id = auth.uid()
             AND p.role IN ('super_admin', 'admin', 'editor')
         )
     );
 
+DROP POLICY IF EXISTS "Admins can manage education" ON education;
 CREATE POLICY "Admins can manage education" ON education
     FOR ALL USING (
         EXISTS (
-            SELECT 1 FROM profiles p 
-            WHERE p.user_id = auth.uid() 
+            SELECT 1 FROM profiles p
+            WHERE p.user_id = auth.uid()
             AND p.role IN ('super_admin', 'admin', 'editor')
         )
     );
 
+DROP POLICY IF EXISTS "Admins can manage services" ON services;
 CREATE POLICY "Admins can manage services" ON services
     FOR ALL USING (
         EXISTS (
-            SELECT 1 FROM profiles p 
-            WHERE p.user_id = auth.uid() 
+            SELECT 1 FROM profiles p
+            WHERE p.user_id = auth.uid()
             AND p.role IN ('super_admin', 'admin', 'editor')
         )
     );
 
+DROP POLICY IF EXISTS "Admins can manage blog categories" ON blog_categories;
 CREATE POLICY "Admins can manage blog categories" ON blog_categories
     FOR ALL USING (
         EXISTS (
-            SELECT 1 FROM profiles p 
-            WHERE p.user_id = auth.uid() 
+            SELECT 1 FROM profiles p
+            WHERE p.user_id = auth.uid()
             AND p.role IN ('super_admin', 'admin', 'editor')
         )
     );
 
+DROP POLICY IF EXISTS "Admins can manage blog tags" ON blog_tags;
 CREATE POLICY "Admins can manage blog tags" ON blog_tags
     FOR ALL USING (
         EXISTS (
-            SELECT 1 FROM profiles p 
-            WHERE p.user_id = auth.uid() 
+            SELECT 1 FROM profiles p
+            WHERE p.user_id = auth.uid()
             AND p.role IN ('super_admin', 'admin', 'editor')
         )
     );
 
+DROP POLICY IF EXISTS "Admins can manage blog posts" ON blog_posts;
 CREATE POLICY "Admins can manage blog posts" ON blog_posts
     FOR ALL USING (
         EXISTS (
-            SELECT 1 FROM profiles p 
-            WHERE p.user_id = auth.uid() 
+            SELECT 1 FROM profiles p
+            WHERE p.user_id = auth.uid()
             AND p.role IN ('super_admin', 'admin', 'editor')
         )
     );
 
+DROP POLICY IF EXISTS "Admins can manage blog post tags" ON blog_post_tags;
 CREATE POLICY "Admins can manage blog post tags" ON blog_post_tags
     FOR ALL USING (
         EXISTS (
-            SELECT 1 FROM profiles p 
-            WHERE p.user_id = auth.uid() 
+            SELECT 1 FROM profiles p
+            WHERE p.user_id = auth.uid()
             AND p.role IN ('super_admin', 'admin', 'editor')
         )
     );
 
+DROP POLICY IF EXISTS "Admins can manage testimonials" ON testimonials;
 CREATE POLICY "Admins can manage testimonials" ON testimonials
     FOR ALL USING (
         EXISTS (
-            SELECT 1 FROM profiles p 
-            WHERE p.user_id = auth.uid() 
+            SELECT 1 FROM profiles p
+            WHERE p.user_id = auth.uid()
             AND p.role IN ('super_admin', 'admin', 'editor')
         )
     );
 
+DROP POLICY IF EXISTS "Admins can manage contact messages" ON contact_messages;
 CREATE POLICY "Admins can manage contact messages" ON contact_messages
     FOR ALL USING (
         EXISTS (
-            SELECT 1 FROM profiles p 
-            WHERE p.user_id = auth.uid() 
+            SELECT 1 FROM profiles p
+            WHERE p.user_id = auth.uid()
             AND p.role IN ('super_admin', 'admin', 'editor')
         )
     );
 
+DROP POLICY IF EXISTS "Admins can manage media" ON media;
 CREATE POLICY "Admins can manage media" ON media
     FOR ALL USING (
         EXISTS (
-            SELECT 1 FROM profiles p 
-            WHERE p.user_id = auth.uid() 
+            SELECT 1 FROM profiles p
+            WHERE p.user_id = auth.uid()
             AND p.role IN ('super_admin', 'admin', 'editor')
         )
     );
 
+DROP POLICY IF EXISTS "Admins can manage site settings" ON site_settings;
 CREATE POLICY "Admins can manage site settings" ON site_settings
     FOR ALL USING (
         EXISTS (
-            SELECT 1 FROM profiles p 
-            WHERE p.user_id = auth.uid() 
+            SELECT 1 FROM profiles p
+            WHERE p.user_id = auth.uid()
             AND p.role IN ('super_admin', 'admin')
         )
     );
 
+DROP POLICY IF EXISTS "Admins can manage SEO settings" ON seo_settings;
 CREATE POLICY "Admins can manage SEO settings" ON seo_settings
     FOR ALL USING (
         EXISTS (
-            SELECT 1 FROM profiles p 
-            WHERE p.user_id = auth.uid() 
+            SELECT 1 FROM profiles p
+            WHERE p.user_id = auth.uid()
             AND p.role IN ('super_admin', 'admin')
         )
     );
 
+DROP POLICY IF EXISTS "Admins can view analytics" ON analytics_events;
 CREATE POLICY "Admins can view analytics" ON analytics_events
     FOR SELECT USING (
         EXISTS (
-            SELECT 1 FROM profiles p 
-            WHERE p.user_id = auth.uid() 
+            SELECT 1 FROM profiles p
+            WHERE p.user_id = auth.uid()
             AND p.role IN ('super_admin', 'admin', 'editor')
         )
     );
 
--- Public insert for contact messages (with rate limiting via edge function)
+DROP POLICY IF EXISTS "Anyone can insert contact messages" ON contact_messages;
 CREATE POLICY "Anyone can insert contact messages" ON contact_messages
     FOR INSERT WITH CHECK (TRUE);
 
--- Users can view their own profile
+DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
 CREATE POLICY "Users can view own profile" ON profiles
     FOR SELECT USING (user_id = auth.uid());
 
--- Users can update their own profile
+DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 CREATE POLICY "Users can update own profile" ON profiles
     FOR UPDATE USING (user_id = auth.uid());
+
+-- Contact message staff write privileges
+REVOKE UPDATE, DELETE ON contact_messages FROM anon, authenticated;
+GRANT UPDATE, DELETE ON contact_messages TO authenticated;
 
 -- Function to increment blog post views
 CREATE OR REPLACE FUNCTION increment_blog_views(post_id UUID)
 RETURNS VOID AS $$
 BEGIN
-    UPDATE blog_posts 
-    SET views = views + 1 
+    UPDATE blog_posts
+    SET views = views + 1
     WHERE id = post_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -526,6 +577,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
     FOR EACH ROW EXECUTE FUNCTION handle_new_user();
@@ -539,33 +591,86 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Apply updated_at triggers
+-- updated_at triggers only on tables that have an updated_at column
+DROP TRIGGER IF EXISTS update_profiles_updated_at ON profiles;
 CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON profiles FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_projects_updated_at ON projects;
 CREATE TRIGGER update_projects_updated_at BEFORE UPDATE ON projects FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_project_images_updated_at BEFORE UPDATE ON project_images FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_skills_updated_at ON skills;
 CREATE TRIGGER update_skills_updated_at BEFORE UPDATE ON skills FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_skill_categories_updated_at ON skill_categories;
 CREATE TRIGGER update_skill_categories_updated_at BEFORE UPDATE ON skill_categories FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_experiences_updated_at ON experiences;
 CREATE TRIGGER update_experiences_updated_at BEFORE UPDATE ON experiences FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_education_updated_at ON education;
 CREATE TRIGGER update_education_updated_at BEFORE UPDATE ON education FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_services_updated_at ON services;
 CREATE TRIGGER update_services_updated_at BEFORE UPDATE ON services FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_blog_categories_updated_at ON blog_categories;
 CREATE TRIGGER update_blog_categories_updated_at BEFORE UPDATE ON blog_categories FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_blog_tags_updated_at BEFORE UPDATE ON blog_tags FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_blog_posts_updated_at ON blog_posts;
 CREATE TRIGGER update_blog_posts_updated_at BEFORE UPDATE ON blog_posts FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_testimonials_updated_at ON testimonials;
 CREATE TRIGGER update_testimonials_updated_at BEFORE UPDATE ON testimonials FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_contact_messages_updated_at ON contact_messages;
 CREATE TRIGGER update_contact_messages_updated_at BEFORE UPDATE ON contact_messages FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_media_updated_at BEFORE UPDATE ON media FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_site_settings_updated_at ON site_settings;
 CREATE TRIGGER update_site_settings_updated_at BEFORE UPDATE ON site_settings FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+DROP TRIGGER IF EXISTS update_seo_settings_updated_at ON seo_settings;
 CREATE TRIGGER update_seo_settings_updated_at BEFORE UPDATE ON seo_settings FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Storage buckets (run in Supabase Storage or via API)
--- INSERT INTO storage.buckets (id, name, public) VALUES 
---     ('project-images', 'project-images', TRUE),
---     ('blog-images', 'blog-images', TRUE),
---     ('avatars', 'avatars', TRUE),
---     ('documents', 'documents', FALSE),
---     ('portfolio-assets', 'portfolio-assets', TRUE);
+-- Storage buckets (idempotent)
+INSERT INTO storage.buckets (id, name, public)
+VALUES
+    ('project-images', 'project-images', TRUE),
+    ('blog-images', 'blog-images', TRUE),
+    ('avatars', 'avatars', TRUE),
+    ('documents', 'documents', FALSE),
+    ('portfolio-assets', 'portfolio-assets', TRUE)
+ON CONFLICT (id) DO NOTHING;
 
--- Storage policies (run in Supabase Storage policies)
--- CREATE POLICY "Public read access for project-images" ON storage.objects FOR SELECT USING (bucket_id = 'project-images');
--- CREATE POLICY "Authenticated users can upload to project-images" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'project-images' AND auth.role() = 'authenticated');
--- CREATE POLICY "Admins can delete from project-images" ON storage.objects FOR DELETE USING (bucket_id = 'project-images' AND EXISTS (SELECT 1 FROM profiles WHERE user_id = auth.uid() AND role IN ('super_admin', 'admin', 'editor')));
+DROP POLICY IF EXISTS "Public read access for project-images" ON storage.objects;
+CREATE POLICY "Public read access for project-images" ON storage.objects
+    FOR SELECT USING (bucket_id = 'project-images');
+
+DROP POLICY IF EXISTS "Public read access for blog-images" ON storage.objects;
+CREATE POLICY "Public read access for blog-images" ON storage.objects
+    FOR SELECT USING (bucket_id = 'blog-images');
+
+DROP POLICY IF EXISTS "Public read access for avatars" ON storage.objects;
+CREATE POLICY "Public read access for avatars" ON storage.objects
+    FOR SELECT USING (bucket_id = 'avatars');
+
+DROP POLICY IF EXISTS "Public read access for portfolio-assets" ON storage.objects;
+CREATE POLICY "Public read access for portfolio-assets" ON storage.objects
+    FOR SELECT USING (bucket_id = 'portfolio-assets');
+
+DROP POLICY IF EXISTS "Authenticated users can upload portfolio media" ON storage.objects;
+CREATE POLICY "Authenticated users can upload portfolio media" ON storage.objects
+    FOR INSERT WITH CHECK (
+        bucket_id IN ('project-images', 'blog-images', 'avatars', 'documents', 'portfolio-assets')
+        AND auth.role() = 'authenticated'
+    );
+
+DROP POLICY IF EXISTS "Admins can delete portfolio media" ON storage.objects;
+CREATE POLICY "Admins can delete portfolio media" ON storage.objects
+    FOR DELETE USING (
+        bucket_id IN ('project-images', 'blog-images', 'avatars', 'documents', 'portfolio-assets')
+        AND EXISTS (
+            SELECT 1 FROM profiles
+            WHERE user_id = auth.uid()
+            AND role IN ('super_admin', 'admin', 'editor')
+        )
+    );

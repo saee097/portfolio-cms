@@ -1,17 +1,16 @@
 /**
- * Applies supabase/schema.sql to a Supabase project.
+ * Applies supabase/schema.sql (+ contact enrichment migration) to a Supabase project.
  *
  * DDL cannot be executed through PostgREST, so this uses the Management API's
  * database/query endpoint, which requires a personal access token.
  *
  * Create a token at: https://supabase.com/dashboard/account/tokens
  *
- *   $ SUPABASE_ACCESS_TOKEN=sbp_xxx node scripts/apply-schema.mjs --dry-run
- *   $ SUPABASE_ACCESS_TOKEN=sbp_xxx node scripts/apply-schema.mjs
+ *   $env:SUPABASE_ACCESS_TOKEN="sbp_xxx"; node scripts/apply-schema.mjs --dry-run
+ *   $env:SUPABASE_ACCESS_TOKEN="sbp_xxx"; node scripts/apply-schema.mjs
  *
- * The SQL is rewritten to be idempotent before execution, so a failed or partial run
- * can simply be repeated: CREATE TABLE/INDEX get IF NOT EXISTS, and policies and
- * triggers are dropped before being recreated. Nothing else in the file is altered.
+ * schema.sql is already idempotent. The enrichment migration is applied after it
+ * so older databases that only need the contact columns still get upgraded.
  */
 import { readFileSync, existsSync } from 'fs'
 import { resolve } from 'path'
@@ -31,8 +30,21 @@ function loadEnv() {
 loadEnv()
 
 const SCHEMA_PATH = resolve(process.cwd(), 'supabase/schema.sql')
+const MIGRATION_PATH = resolve(
+  process.cwd(),
+  'supabase/migrations/20261004_contact_messages_enrichment.sql'
+)
 const MANAGEMENT_API = 'https://api.supabase.com/v1/projects'
-const VERIFY_TABLES = ['profiles', 'projects', 'blog_posts', 'contact_messages', 'site_settings']
+const VERIFY_TABLES = [
+  'profiles',
+  'projects',
+  'blog_posts',
+  'contact_messages',
+  'site_settings',
+  'experiences',
+  'skills',
+  'services',
+]
 
 const accessToken = process.env.SUPABASE_ACCESS_TOKEN
 const dryRun = process.argv.includes('--dry-run')
@@ -46,31 +58,6 @@ function getProjectRef(url) {
   } catch {
     return null
   }
-}
-
-/** Rewrites the schema so repeated runs cannot fail on already-existing objects. */
-function makeIdempotent(sql) {
-  return sql
-    .replace(/^(\s*)CREATE TABLE (?!IF NOT EXISTS)/gim, '$1CREATE TABLE IF NOT EXISTS ')
-    .replace(/^(\s*)CREATE UNIQUE INDEX (?!IF NOT EXISTS)/gim, '$1CREATE UNIQUE INDEX IF NOT EXISTS ')
-    .replace(/^(\s*)CREATE INDEX (?!IF NOT EXISTS)/gim, '$1CREATE INDEX IF NOT EXISTS ')
-    .replace(
-      /^(\s*)CREATE POLICY (\S+) ON ([^\n]+)$/gim,
-      (match, indent, name, target) =>
-        `${indent}DROP POLICY IF EXISTS ${name} ON ${target};\n${indent}CREATE POLICY ${name} ON ${target}`
-    )
-    .replace(
-      /^(\s*)CREATE TRIGGER (\S+) (BEFORE|AFTER) ([\s\S]*?)(FOR EACH ROW EXECUTE FUNCTION [^;]+;)/gim,
-      (match, indent, name, timing, rest, tail) =>
-        `${indent}DROP TRIGGER IF EXISTS ${name} ON ${indent}${tableFromTrigger(rest)};\n` +
-        `${indent}CREATE TRIGGER ${name} ${timing} ${rest}${tail}`
-    )
-}
-
-/** Extracts the target table from a CREATE TRIGGER body (FROM "table" ON "table"). */
-function tableFromTrigger(body) {
-  const match = body.match(/ON\s+"?([a-z_]+)"?/i)
-  return match ? `"${match[1]}"` : 'unknown_table'
 }
 
 async function runQuery(ref, query) {
@@ -90,7 +77,7 @@ async function runQuery(ref, query) {
   return text
 }
 
-async function verify(ref) {
+async function verify() {
   const results = []
   for (const table of VERIFY_TABLES) {
     if (!supabaseUrl || !anonKey) {
@@ -101,7 +88,18 @@ async function verify(ref) {
       const response = await fetch(`${supabaseUrl}/rest/v1/${table}?select=*&limit=1`, {
         headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` },
       })
-      results.push(`${table.padEnd(18)} HTTP ${response.status}${response.ok ? ' OK' : ' NOT FOUND'}`)
+      const body = await response.text()
+      const code = (() => {
+        try {
+          return JSON.parse(body)?.code
+        } catch {
+          return null
+        }
+      })()
+      const ok = response.ok
+      results.push(
+        `${table.padEnd(18)} HTTP ${response.status}${ok ? ' OK' : code ? ` ${code}` : ' FAIL'}`
+      )
     } catch (error) {
       results.push(`${table.padEnd(18)} probe failed: ${error.message}`)
     }
@@ -111,19 +109,20 @@ async function verify(ref) {
 
 async function main() {
   const ref = getProjectRef(supabaseUrl)
-  const original = readFileSync(SCHEMA_PATH, 'utf8')
-  const sql = makeIdempotent(original)
+  const schemaSql = readFileSync(SCHEMA_PATH, 'utf8')
+  const migrationSql = existsSync(MIGRATION_PATH) ? readFileSync(MIGRATION_PATH, 'utf8') : ''
 
-  const tableCount = (sql.match(/CREATE TABLE IF NOT EXISTS/gi) || []).length
-  const policyCount = (sql.match(/CREATE POLICY/gi) || []).length
+  const tableCount = (schemaSql.match(/CREATE TABLE IF NOT EXISTS/gi) || []).length
+  const policyCount = (schemaSql.match(/CREATE POLICY/gi) || []).length
 
-  console.log(`Schema : ${SCHEMA_PATH}`)
-  console.log(`Project: ${ref ?? 'unknown (NEXT_PUBLIC_SUPABASE_URL not set)'}`)
-  console.log(`Content: ${tableCount} tables, ${policyCount} policies`)
+  console.log(`Schema    : ${SCHEMA_PATH}`)
+  console.log(`Migration : ${MIGRATION_PATH}`)
+  console.log(`Project   : ${ref ?? 'unknown (NEXT_PUBLIC_SUPABASE_URL not set)'}`)
+  console.log(`Content   : ${tableCount} tables, ${policyCount} policies`)
 
   if (dryRun) {
-    console.log('\n--- DRY RUN: no changes made. First 40 lines of executable SQL ---\n')
-    console.log(sql.split('\n').slice(0, 40).join('\n'))
+    console.log('\n--- DRY RUN: no changes made. First 40 lines of schema SQL ---\n')
+    console.log(schemaSql.split('\n').slice(0, 40).join('\n'))
     console.log('\nRe-run without --dry-run to apply.')
     return
   }
@@ -131,7 +130,14 @@ async function main() {
   if (!accessToken) {
     console.error('\nMissing SUPABASE_ACCESS_TOKEN.')
     console.error('Create one at https://supabase.com/dashboard/account/tokens')
-    console.error('Then run: set SUPABASE_ACCESS_TOKEN=sbp_xxx && node scripts/apply-schema.mjs')
+    console.error('Then run:')
+    console.error('  $env:SUPABASE_ACCESS_TOKEN="sbp_xxx"; node scripts/apply-schema.mjs')
+    console.error('\nOr paste supabase/schema.sql into:')
+    if (ref) {
+      console.error(`  https://supabase.com/dashboard/project/${ref}/sql/new`)
+    } else {
+      console.error('  https://supabase.com/dashboard → your project → SQL Editor')
+    }
     process.exit(1)
   }
 
@@ -142,7 +148,7 @@ async function main() {
 
   console.log('\nApplying schema…')
   try {
-    await runQuery(ref, sql)
+    await runQuery(ref, schemaSql)
     console.log('Schema applied successfully.')
   } catch (error) {
     console.error(`\nSchema failed: ${error.message}`)
@@ -150,11 +156,24 @@ async function main() {
     process.exit(1)
   }
 
-  console.log('\nVerification:')
-  for (const line of await verify(ref)) console.log(`  ${line}`)
+  if (migrationSql.trim()) {
+    console.log('Applying contact enrichment migration…')
+    try {
+      await runQuery(ref, migrationSql)
+      console.log('Migration applied successfully.')
+    } catch (error) {
+      console.error(`\nMigration failed: ${error.message}`)
+      process.exit(1)
+    }
+  }
 
-  console.log('\nNext step — promote your admin account:')
-  console.log("  UPDATE profiles SET role = 'super_admin' WHERE email = 'admin123@gmail.com';")
+  console.log('\nVerification:')
+  for (const line of await verify()) console.log(`  ${line}`)
+
+  console.log('\nNext steps:')
+  console.log('  1. Reload /admin — the “Database is not initialised” banner should be gone.')
+  console.log('  2. Ensure an admin user exists: node scripts/create-admin.mjs')
+  console.log("  3. If needed: UPDATE profiles SET role = 'super_admin' WHERE email = 'your@email.com';")
 }
 
 main()

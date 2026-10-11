@@ -12,7 +12,7 @@ export interface ContactPageSettings {
 }
 
 const DEFAULTS: ContactPageSettings = {
-  contactEmail: 'hello@example.com',
+  contactEmail: 'saeedsaeed7745@gmail.com',
   contactPhone: null,
   location: null,
   timezone: 'UTC±0',
@@ -20,8 +20,8 @@ const DEFAULTS: ContactPageSettings = {
   availability: 'Taking on new work',
   isAvailable: true,
   social: [
-    { label: 'GitHub', href: 'https://github.com', icon: 'github' },
-    { label: 'LinkedIn', href: 'https://linkedin.com', icon: 'linkedin' },
+    { label: 'GitHub', href: 'https://github.com/saee097', icon: 'github' },
+    { label: 'LinkedIn', href: 'www.linkedin.com/in/saeed-ur-rahman-dev', icon: 'linkedin' },
     { label: 'X', href: 'https://twitter.com', icon: 'twitter' },
   ],
 }

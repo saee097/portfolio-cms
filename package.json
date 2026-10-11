@@ -6,7 +6,11 @@
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:apply": "node scripts/apply-schema.mjs",
+    "db:apply:dry": "node scripts/apply-schema.mjs --dry-run",
+    "db:seed": "node scripts/seed-essentials.mjs",
+    "admin:create": "node scripts/create-admin.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
