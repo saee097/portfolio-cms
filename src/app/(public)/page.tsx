@@ -1,8 +1,10 @@
 import { Metadata } from 'next'
+
 import Link from 'next/link'
-import { ArrowRight, CheckCircle, Code, Database, Globe, Layers, Rocket, Server, Terminal, Users } from 'lucide-react'
+import { ArrowRight, CheckCircle, Layers } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { TechnologyStack } from '@/components/public/TechnologyStack'
 import { cn } from '@/lib/utils'
 import { formatDate } from '@/lib/utils'
 import { getFeaturedProjects } from '@/services/project.service'
@@ -15,17 +17,6 @@ export const metadata: Metadata = {
   title: 'CodeSpare - Full Stack Developer',
   description: 'Full-stack developer specializing in React, Next.js, TypeScript, and modern web technologies.',
 }
-
-const techStack = [
-  { name: 'React', icon: Code, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-  { name: 'Next.js', icon: Terminal, color: 'text-slate-600 dark:text-slate-400', bg: 'bg-slate-100 dark:bg-slate-800' },
-  { name: 'TypeScript', icon: Code, color: 'text-blue-600', bg: 'bg-blue-500/10' },
-  { name: 'Node.js', icon: Server, color: 'text-green-600', bg: 'bg-green-500/10' },
-  { name: 'PostgreSQL', icon: Database, color: 'text-blue-700', bg: 'bg-blue-700/10' },
-  { name: 'Supabase', icon: Layers, color: 'text-green-500', bg: 'bg-green-500/10' },
-  { name: 'Tailwind CSS', icon: Globe, color: 'text-cyan-500', bg: 'bg-cyan-500/10' },
-  { name: 'Docker', icon: Layers, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-]
 
 async function getHomeData() {
   const [featuredProjects, services, experiences, testimonials] = await Promise.all([
@@ -52,7 +43,7 @@ export default async function HomePage() {
       <section className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden bg-gradient-to-b from-primary-50 to-white dark:from-slate-900 dark:to-slate-950">
         <div className="container-main relative z-10 py-10">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="mb-8 animate-in fade-in-0">
+            <div className="mb-5 animate-in fade-in-0">
               <span className="inline-flex items-center gap-2 rounded-full bg-primary-100 px-4 py-1.5 text-sm font-medium text-primary-700 dark:bg-primary-900/30 dark:text-primary-300">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-400 opacity-75"></span>
@@ -61,7 +52,7 @@ export default async function HomePage() {
                 Available for freelance projects
               </span>
             </div>
-            <h1 className="mb-6 text-5xl sm:text-6xl lg:text-7xl font-semibold tracking-tight text-slate-600 dark:text-slate-100">
+            <h1 className="mb-6 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-slate-600 dark:text-slate-100">
               Building <span className="text-primary-700 dark:text-primary-300">Digital Experiences</span> That Matter
             </h1>
             <p className="mb-10 text-xl sm:text-2xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto">
@@ -84,21 +75,21 @@ export default async function HomePage() {
           </div>
 
           {/* Stats */}
-          <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8">
             <div className="text-center animate-in fade-in-0 zoom-in-95" style={{ animationDelay: '0ms' }}>
-              <div className="text-4xl sm:text-5xl font-semibold text-primary-700 dark:text-primary-300">{experiences.length}+</div>
+              <div className="text-3xl sm:text-4xl font-semibold text-primary-700 dark:text-primary-300">{experiences.length}+</div>
               <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">Years Experience</div>
             </div>
             <div className="text-center animate-in fade-in-0 zoom-in-95" style={{ animationDelay: '100ms' }}>
-              <div className="text-4xl sm:text-5xl font-semibold text-primary-700 dark:text-primary-300">{services.length}+</div>
+              <div className="text-3xl sm:text-4xl font-semibold text-primary-700 dark:text-primary-300">{services.length}+</div>
               <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">Services Offered</div>
             </div>
             <div className="text-center animate-in fade-in-0 zoom-in-95" style={{ animationDelay: '200ms' }}>
-              <div className="text-4xl sm:text-5xl font-semibold text-primary-700 dark:text-primary-300">{featuredProjects.length}+</div>
+              <div className="text-3xl sm:text-4xl font-semibold text-primary-700 dark:text-primary-300">{featuredProjects.length}+</div>
               <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">Projects Completed</div>
             </div>
             <div className="text-center animate-in fade-in-0 zoom-in-95" style={{ animationDelay: '300ms' }}>
-              <div className="text-4xl sm:text-5xl font-semibold text-primary-700 dark:text-primary-300">{testimonials.length}+</div>
+              <div className="text-3xl sm:text-4xl font-semibold text-primary-700 dark:text-primary-300">{testimonials.length}+</div>
               <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">Happy Clients</div>
             </div>
           </div>
@@ -111,31 +102,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Technology Stack */}
-      <section className="bg-white dark:bg-slate-950 py-14">
-        <div className="container-main">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="section-title">Technology Stack</h2>
-            <p className="section-subtitle">Modern tools and frameworks I use to build robust, scalable applications.</p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-            {techStack.map((tech, index) => (
-              <div
-                key={tech.name}
-                className="group card text-center animate-in fade-in-0"
-                style={{ animationDelay: `${index * 50}ms` }}
-              >
-                <div className={cn('mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl', tech.bg)}>
-                  <tech.icon className={cn('h-7 w-7', tech.color)} />
-                </div>
-                <h3 className="font-medium text-slate-600 dark:text-slate-100 group-hover:text-primary-700 dark:group-hover:text-primary-300 transition-colors">
-                  {tech.name}
-                </h3>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        {/* Technology Stack */}
+        <TechnologyStack />
 
       {/* Featured Projects */}
       <section className="bg-slate-50 dark:bg-slate-900 py-14">
@@ -264,28 +232,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* GitHub Activity / CTA */}
-      <section className="bg-primary-700 dark:bg-primary-800 py-14">
-        <div className="container-main">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl sm:text-4xl font-semibold text-white mb-4">Let&apos;s Build Something Great Together</h2>
-            <p className="text-primary-100 mb-8 text-lg">I&apos;m always open to discussing new projects, creative ideas, or opportunities to be part of your vision.</p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/contact">
-                <Button size="lg" variant="secondary" className="w-full sm:w-auto bg-white text-primary-700 hover:bg-primary-50">
-                  Get In Touch
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/resume">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto border-white text-white hover:bg-primary-600">
-                  Download Resume
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+   
 
       {/* Testimonials */}
       <section className="bg-white dark:bg-slate-950 py-14">

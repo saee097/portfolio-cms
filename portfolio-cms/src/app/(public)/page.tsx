@@ -1,9 +1,8 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowRight, CheckCircle, Code, Database, Globe, Layers, Rocket, Server, Terminal, Users } from 'lucide-react'
+import Image from 'next/image'
+import { ArrowRight, CheckCircle, Layers } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
-import { Card } from '@/components/ui/Card'
-import { cn } from '@/lib/utils'
 import { formatDate } from '@/lib/utils'
 import { getFeaturedProjects } from '@/services/project.service'
 import { getServices } from '@/services/service.service'
@@ -17,14 +16,21 @@ export const metadata: Metadata = {
 }
 
 const techStack = [
-  { name: 'React', icon: Code, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-  { name: 'Next.js', icon: Terminal, color: 'text-slate-600 dark:text-slate-400', bg: 'bg-slate-100 dark:bg-slate-800' },
-  { name: 'TypeScript', icon: Code, color: 'text-blue-600', bg: 'bg-blue-500/10' },
-  { name: 'Node.js', icon: Server, color: 'text-green-600', bg: 'bg-green-500/10' },
-  { name: 'PostgreSQL', icon: Database, color: 'text-blue-700', bg: 'bg-blue-700/10' },
-  { name: 'Supabase', icon: Layers, color: 'text-green-500', bg: 'bg-green-500/10' },
-  { name: 'Tailwind CSS', icon: Globe, color: 'text-cyan-500', bg: 'bg-cyan-500/10' },
-  { name: 'Docker', icon: Layers, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+  { name: 'React', image: 'https://www.eyratech.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Freact.40f32d98.png&w=96&q=75' },
+  { name: 'Next.js', image: 'https://www.eyratech.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fnext-js.bb4f8517.png&w=96&q=75' },
+  { name: 'TypeScript', image: 'https://www.eyratech.com/_next/static/media/typescript.4e0e6c2e.svg' },
+  { name: 'Node.js', image: 'https://www.eyratech.com/_next/static/media/nodejs.55550675.svg' },
+  { name: 'PostgreSQL', image: 'https://www.eyratech.com/_next/static/media/expressjs.34b872b8.svg' },
+  { name: 'Supabase', image: 'https://cdn.simpleicons.org/supabase/00FFA3' },
+  { name: 'Tailwind CSS', image: 'https://www.eyratech.com/_next/static/media/tailwindcss.6777416a.svg' },
+  { name: 'Docker', image: 'https://cdn.simpleicons.org/docker/2496ED' },
+  { name: 'NestJS', image: 'https://www.eyratech.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fnestjs.461eb036.png&w=96&q=75' },
+  { name: 'Express JS', image: 'https://www.eyratech.com/_next/static/media/expressjs.34b872b8.svg' },
+  { name: 'Python', image: 'https://www.eyratech.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fpython.d9a25f72.png&w=96&q=75' },
+  { name: 'Django', image: 'https://www.eyratech.com/_next/static/media/django.30a8fb3f.svg' },
+  { name: 'MongoDB', image: 'https://www.eyratech.com/_next/static/media/mongodb.859f56f4.svg' },
+  { name: 'MySQL', image: 'https://www.eyratech.com/_next/static/media/mysql.6cc200fb.svg' },
+  { name: 'Redis', image: 'https://www.eyratech.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fredis.b36425ab.png&w=96&q=75' },
 ]
 
 async function getHomeData() {
@@ -118,17 +124,24 @@ export default async function HomePage() {
             <h2 className="section-title">Technology Stack</h2>
             <p className="section-subtitle">Modern tools and frameworks I use to build robust, scalable applications.</p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
             {techStack.map((tech, index) => (
               <div
                 key={tech.name}
-                className="group card text-center animate-in fade-in-0"
-                style={{ animationDelay: `${index * 50}ms` }}
+                className="card group text-center relative px-4 py-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 hover:bg-white dark:hover:bg-slate-800 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 animate-in fade-in-0"
+                style={{ animationDelay: `${index * 40}ms` }}
               >
-                <div className={cn('mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl', tech.bg)}>
-                  <tech.icon className={cn('h-7 w-7', tech.color)} />
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800">
+                  <Image
+                    src={tech.image}
+                    alt={tech.name}
+                    width={48}
+                    height={48}
+                    className="w-8 h-8 object-contain"
+                    priority={index < 4}
+                  />
                 </div>
-                <h3 className="font-medium text-slate-900 dark:text-slate-100 group-hover:text-primary-700 dark:group-hover:text-primary-300 transition-colors">
+                <h3 className="text-sm font-medium text-slate-900 dark:text-slate-100 group-hover:text-primary-700 dark:group-hover:text-primary-300 transition-colors leading-tight">
                   {tech.name}
                 </h3>
               </div>
@@ -264,28 +277,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* GitHub Activity / CTA */}
-      <section className="section bg-primary-700 dark:bg-primary-800">
-        <div className="container-main">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Let&apos;s Build Something Great Together</h2>
-            <p className="text-primary-100 mb-8 text-lg">I&apos;m always open to discussing new projects, creative ideas, or opportunities to be part of your vision.</p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/contact">
-                <Button size="lg" variant="secondary" className="w-full sm:w-auto bg-white text-primary-700 hover:bg-primary-50">
-                  Get In Touch
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/resume">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto border-white text-white hover:bg-primary-600">
-                  Download Resume
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+
 
       {/* Testimonials */}
       <section className="section bg-white dark:bg-slate-950">

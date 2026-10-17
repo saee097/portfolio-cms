@@ -21,8 +21,7 @@ const footerNavigation = {
     { name: 'Skills', href: '/skills' },
     { name: 'Experience', href: '/experience' },
     { name: 'Education', href: '/education' },
-    { name: 'Services', href: '/services' },
-    { name: 'Resume', href: '/resume' },
+    { name: 'Services', href: '/services' }
   ],
   'Legal': [
     { name: 'Privacy Policy', href: '/privacy' },

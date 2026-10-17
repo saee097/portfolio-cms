@@ -17,8 +17,7 @@ const navigation = [
   { name: 'Services', href: '/services' },
   { name: 'Projects', href: '/projects' },
   { name: 'Blog', href: '/blog' },
-  { name: 'Contact', href: '/contact' },
-  { name: 'Resume', href: '/resume' },
+  { name: 'Contact', href: '/contact' }
 ]
 
 export function Navbar() {
@@ -46,9 +45,9 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
+        'fixed top-0 left-0 right-0 z-50  transition-all duration-300',
         scrolled
-          ? 'bg-white/95 dark:bg-slate-950/95 backdrop-blur-sm shadow-sm border-b border-slate-200 dark:border-slate-800'
+          ? 'bg-white/95 dark:bg-slate-950/95  dark:border-slate-800'
           : 'bg-transparent'
       )}
     >
@@ -64,7 +63,7 @@ export function Navbar() {
             </Link>
           </div>
 
-          <div className="hidden md:flex md:items-center md:gap-6">
+          <div className="hidden md:flex md:items-center md:gap-8">
             {navigation.map(item => (
               <Link
                 key={item.name}
